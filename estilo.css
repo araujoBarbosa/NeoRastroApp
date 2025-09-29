@@ -1,0 +1,173 @@
+/* ========== Base / Reset ========== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cor-fundo: #0b1220;
+  --cor-fundo-2: #111727;
+  --cor-cartao-escuro: rgba(255,255,255,0.06);
+  --cor-cartao-claro: #ffffff;
+  --cor-texto: #f3f4f6;
+  --cor-texto-escuro: #0f172a;
+  --cor-suave: #9ca3af;
+  --cor-marca: #2563EB;
+  --cor-marca-escura: #1E3A8A;
+  --cor-ok: #22C55E;
+  --cor-erro: #DC2626;
+  --cor-destaque: #22C55E;
+  --cor-acento: #60A5FA;
+}
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+/* Utilitários */
+.container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 1rem; }
+
+.cartao-escuro {
+  background-color: var(--cor-cartao-escuro);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.cartao-claro {
+  background-color: var(--cor-cartao-claro);
+  color: var(--cor-texto-escuro);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Botões */
+button {
+  padding: 0.75rem 1rem;
+  background-color: var(--cor-marca);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+button:hover { background-color: var(--cor-marca-escura); transform: translateY(-1px); }
+button:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 3px; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Campos de entrada */
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #1f2937;
+  color: var(--cor-texto);
+  transition: background-color .2s ease, outline .2s ease;
+}
+input::placeholder { color: var(--cor-suave); }
+input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2px; background-color: #374151; }
+
+/* Acessibilidade: respeitar preferência de movimento */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ========== Página: Autenticação (login/cadastro) ========== */
+.pagina--autenticacao {
+  background:
+    linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.45)),
+    url('testeRast.jpg') no-repeat center/cover fixed;
+  min-height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.pagina--autenticacao .sobreposicao {
+  background-color: rgba(17, 23, 39, 0.80);
+  width: 100%;
+  min-height: 100dvh;
+  padding: 2rem;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* Cabeçalho da autenticação */
+.pagina--autenticacao header {
+  width: 100%; max-width: 800px;
+  display: flex; gap: 1rem; align-items: center; justify-content: space-between;
+  margin-bottom: 2rem; text-align: center;
+}
+.pagina--autenticacao header h1 {
+  color: var(--cor-acento);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  flex-grow: 1;
+}
+
+/* Cartões de formulário */
+.pagina--autenticacao .secao-formulario {
+  width: 100%; max-width: 420px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.pagina--autenticacao .secao-formulario h2 {
+  color: var(--cor-ok);
+  margin-bottom: 1.5rem; text-align: center;
+}
+
+/* Mensagens */
+#mensagem-erro, #mensagem-login {
+  margin-bottom: 1rem; font-size: .95rem; padding: .5rem; border-radius: 6px; display:none;
+}
+#mensagem-erro.erro, #mensagem-login.erro { background-color: var(--cor-erro); color: #fff; display:block; }
+#mensagem-erro.sucesso, #mensagem-login.sucesso { background-color: var(--cor-ok); color: #fff; display:block; }
+
+/* Campo senha com alternar visibilidade */
+.campo-senha { position: relative; }
+.botao-alternar-senha {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--cor-acento); font-size: 1.1rem; cursor: pointer;
+}
+.botao-alternar-senha:focus-visible { outline: 2px solid var(--cor-destaque); border-radius: 4px; }
+
+/* Responsividade da autenticação */
+@media (max-width: 480px) {
+  .pagina--autenticacao header { flex-direction: column; gap: 1rem; }
+  .pagina--autenticacao header h1 { font-size: 2rem; text-align: center; }
+  .pagina--autenticacao .secao-formulario { padding: 1rem; max-width: 100%; }
+  input, button { font-size: .95rem; }
+}
+
+/* ========== Página: Painel (dashboard) ========== */
+.pagina--painel { background: #0f172a; min-height: 100dvh; }
+.pagina--painel .container { padding-top: 20px; padding-bottom: 20px; }
+
+/* Cabeçalho do painel */
+.pagina--painel header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #1d4ed8; color: #fff;
+  padding: 15px 20px; border-radius: 10px; margin-bottom: 16px;
+}
+.pagina--painel header h1 { margin: 0; font-size: 1.5rem; }
+#bem-vindo { margin-right: 15px; font-size: 1rem; font-weight: bold; }
+
+#botao-sair {
+  background: #ef4444; border: none; padding: 8px 15px; border-radius: 6px;
+  color: white; font-weight: bold; cursor: pointer; transition: background .2s ease;
+}
+#botao-sair:hover { background: #dc2626; }
+
+/* Painel de rastreamento */
+.pagina--painel .secao-mapa { padding: 20px; }
+.pagina--painel .secao-mapa.cartao-claro { /* mapa em cartão claro */ }
+.pagina--painel .secao-mapa.cartao-escuro { /* mapa em cartão escuro */ }
+
+#mapa-rastreamento {
+  width: 100%;
+  height: 70vh;          /* Altura responsiva para o painel */
+  min-height: 360px;     /* Garantia mínima para notebooks pequenos */
+  border-radius: 10px;
+  margin-top: 15px;
+  border: 2px solid var(--cor-acento);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
