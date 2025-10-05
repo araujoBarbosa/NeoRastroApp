@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoRastro - Sistema de Rastreamento</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚗 NeoRastro</h1>
+            <p>Sistema de Rastreamento Veicular</p>
+        </header>
+        
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2>Bem-vindo ao NeoRastro!</h2>
+                <p>Controle total sobre seus veículos em tempo real</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <span class="icon">📍</span>
+                        <h3>Rastreamento em Tempo Real</h3>
+                        <p>Visualize a localização dos seus veículos no mapa</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="icon">🔒</span>
+                        <h3>Bloqueio Remoto</h3>
+                        <p>Bloqueie ou desbloqueie seus veículos remotamente</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <span class="icon">📊</span>
+                        <h3>Relatórios Detalhados</h3>
+                        <p>Histórico completo de posições e comandos</p>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="login.html" class="btn btn-primary">Fazer Login</a>
+                    <a href="cadastro.html" class="btn btn-secondary">Criar Conta</a>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; 2024 NeoRastro - Powered by Cloudflare Pages</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Verificar se já está logado e redirecionar
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('neorastro_token');
+            if (token) {
+                // Se já está logado, redirecionar para o painel
+                window.location.href = '/painel.html';
+            }
+        });
+    </script>
+</body>
+</html>
