@@ -11,7 +11,7 @@
     default-src 'self';
     img-src 'self' data:;
     style-src 'self' 'unsafe-inline';
-    script-src 'self' 'unsafe-inline';
+    script-src 'self';
     connect-src 'self';
     base-uri 'self';
     form-action 'self';
@@ -23,382 +23,123 @@
   <meta name="csrf-token" content="{{CSRF_TOKEN}}" />
 
   <link rel="preload" as="image" href="imagem-principal.jpg" />
-// ...existing code...
-  <script>
-    // ✅ FUNCIONALIDADE COMPLETA DO CADASTRO NEORASTRO
-    
-    // Variáveis globais
-    let validacaoAtiva = false;
-    
-    // 👁️ FUNÇÃO PARA ALTERNAR VISIBILIDADE DAS SENHAS
-    function configurarAlternarSenha() {
-      console.log('🔧 Configurando botões de alternar senha...');
-      
-      const botoesAlternar = document.querySelectorAll('.botao-alternar-senha');
-      
-      botoesAlternar.forEach((botao, index) => {
-        const campoControle = botao.getAttribute('aria-controls');
-        const campoSenha = document.getElementById(campoControle);
-        
-        if (!campoSenha) {
-          console.warn(`❌ Campo ${campoControle} não encontrado`);
-          return;
-        }
-        
-        console.log(`✅ Configurando botão ${index + 1} para campo ${campoControle}`);
-        
-        botao.addEventListener('click', function() {
-          const senhaVisivel = campoSenha.type === 'text';
-          
-          // Alternar tipo do campo
-          campoSenha.type = senhaVisivel ? 'password' : 'text';
-          
-          // Atualizar atributos do botão
-          botao.setAttribute('aria-pressed', !senhaVisivel);
-          botao.setAttribute('aria-label', senhaVisivel ? 'Mostrar senha' : 'Ocultar senha');
-          
-          // Alterar ícone
-          botao.textContent = senhaVisivel ? '👁️' : '🙈';
-          
-          console.log(`👁️ Senha ${campoControle}: ${senhaVisivel ? 'ocultada' : 'mostrada'}`);
-        });
-      });
+  <style>
+    :root {
+      --cor-fundo:#0b1220; --cor-fundo-2:#0f172a; --cor-cartao:rgba(255,255,255,0.08);
+      --cor-texto:#e5e7eb; --cor-suave:#94a3b8; --cor-marca:#3b82f6; --cor-marca-escura:#2563eb;
+      --cor-ok:#16a34a; --cor-erro:#ef4444;
     }
-    
-    // 📊 MEDIDOR DE FORÇA DA SENHA
-    function configurarMedidorForca() {
-      console.log('🔧 Configurando medidor de força da senha...');
-      
-      const campoSenha = document.getElementById('campo-senha');
-      const barraProgresso = document.getElementById('forca-senha');
-      const rotuloForca = document.getElementById('rotulo-forca');
-      
-      if (!campoSenha || !barraProgresso || !rotuloForca) {
-        console.warn('❌ Elementos do medidor de força não encontrados');
-        return;
-      }
-      
-      campoSenha.addEventListener('input', function() {
-        const senha = campoSenha.value;
-        let pontuacao = 0;
-        let textoForca = 'Muito fraca';
-        let corClasse = 'fraca';
-        
-        // Critérios de força
-        if (senha.length >= 8) pontuacao++;
-        if (/[a-z]/.test(senha)) pontuacao++;
-        if (/[A-Z]/.test(senha)) pontuacao++;
-        if (/\d/.test(senha)) pontuacao++;
-        if (/[^a-zA-Z\d]/.test(senha)) pontuacao++;
-        
-        // Definir texto e classe baseado na pontuação
-        switch (pontuacao) {
-          case 0:
-          case 1:
-            textoForca = 'Muito fraca';
-            corClasse = 'muito-fraca';
-            break;
-          case 2:
-            textoForca = 'Fraca';
-            corClasse = 'fraca';
-            break;
-          case 3:
-            textoForca = 'Média';
-            corClasse = 'media';
-            break;
-          case 4:
-            textoForca = 'Forte';
-            corClasse = 'forte';
-            break;
-          case 5:
-            textoForca = 'Muito forte';
-            corClasse = 'muito-forte';
-            break;
-        }
-        
-        // Atualizar elementos visuais
-        barraProgresso.value = pontuacao;
-        rotuloForca.textContent = `Força: ${textoForca}`;
-        rotuloForca.className = `forca-${corClasse}`;
-        
-        // Validar formulário após mudança
-        validarFormulario();
-      });
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      color:var(--cor-texto);
+      background:url("fundo.jpg") center/cover no-repeat fixed, linear-gradient(180deg,var(--cor-fundo),var(--cor-fundo-2));
     }
-    
-    // ✅ VALIDAÇÃO DE CONFIRMAÇÃO DE SENHA
-    function validarConfirmacaoSenha() {
-      const campoSenha = document.getElementById('campo-senha');
-      const campoConfirmar = document.getElementById('campo-confirmar');
-      const mensagemCadastro = document.getElementById('mensagem-cadastro');
-      
-      if (!campoSenha || !campoConfirmar) return true;
-      
-      const senha = campoSenha.value;
-      const confirmar = campoConfirmar.value;
-      
-      // Se ambos os campos têm conteúdo, validar
-      if (senha && confirmar) {
-        if (senha !== confirmar) {
-          campoConfirmar.setAttribute('aria-invalid', 'true');
-          
-          if (validacaoAtiva) {
-            mensagemCadastro.textContent = '❌ As senhas não coincidem';
-            mensagemCadastro.className = 'mensagem erro';
-          }
-          
-          return false;
-        } else {
-          campoConfirmar.removeAttribute('aria-invalid');
-          
-          // Limpar mensagem de erro se era sobre senhas
-          if (mensagemCadastro.textContent.includes('não coincidem')) {
-            mensagemCadastro.textContent = '';
-            mensagemCadastro.className = 'mensagem';
-          }
-          
-          return true;
-        }
-      }
-      
-      return true;
+    a{color:#93c5fd}
+    .sobreposicao{min-height:100dvh;display:grid;place-items:center;padding:24px;backdrop-filter:saturate(1.2) blur(1.5px);background:linear-gradient(0deg,rgba(0,0,0,.45),rgba(0,0,0,.45))}
+    header{text-align:center;margin-bottom:8px}
+    header h1{font-size:clamp(1.8rem,3.5vw,2.5rem);margin:0;color:var(--cor-marca)}
+    header p{color:var(--cor-suave);margin:.25rem 0 0}
+    main{width:100%;max-width:480px}
+    .cartao-escuro{background:var(--cor-cartao);border:1px solid rgba(148,163,184,.15);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(2,6,23,.35)}
+    .cartao-escuro h2{margin:0 0 12px 0;font-size:1.25rem}
+    form{display:grid;gap:12px}
+    label{font-size:.9rem;color:var(--cor-suave)}
+    .so-leitor{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="password"]{
+      width:100%;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.6);
+      color:var(--cor-texto);border-radius:12px;padding:12px 14px;outline:none
     }
-    
-    // 📱 FORMATAÇÃO DO TELEFONE
-    function configurarFormatacaoTelefone() {
-      const campoTelefone = document.getElementById('campo-telefone');
-      
-      if (!campoTelefone) return;
-      
-      campoTelefone.addEventListener('input', function() {
-        let valor = campoTelefone.value.replace(/\D/g, '');
-        
-        // Limitar a 11 dígitos
-        if (valor.length > 11) {
-          valor = valor.substring(0, 11);
-        }
-        
-        // Aplicar formatação
-        if (valor.length >= 2) {
-          valor = `(${valor.substring(0, 2)}) ${valor.substring(2)}`;
-        }
-        
-        if (valor.length >= 10) {
-          const ddd = valor.substring(0, 4);
-          const parte1 = valor.substring(5, 10);
-          const parte2 = valor.substring(10);
-          valor = `${ddd} ${parte1}-${parte2}`;
-        }
-        
-        campoTelefone.value = valor;
-      });
-    }
-    
-    // 🔍 VALIDAÇÃO GERAL DO FORMULÁRIO
-    function validarFormulario() {
-      const formulario = document.getElementById('formulario-cadastro');
-      const botaoCadastro = document.getElementById('botao-cadastro');
-      const campoAceite = document.getElementById('campo-aceite');
-      
-      if (!formulario || !botaoCadastro || !campoAceite) return;
-      
-      // Verificar se todos os campos obrigatórios estão preenchidos
-      const camposObrigatorios = formulario.querySelectorAll('input[required]');
-      let todosPreenchidos = true;
-      
-      camposObrigatorios.forEach(campo => {
-        if (!campo.value.trim()) {
-          todosPreenchidos = false;
-        }
-      });
-      
-      // Verificar se as senhas coincidem
-      const senhasValidas = validarConfirmacaoSenha();
-      
-      // Verificar se o formulário é válido
-      const formularioValido = formulario.checkValidity();
-      
-      // Habilitar/desabilitar botão
-      const podeEnviar = todosPreenchidos && senhasValidas && formularioValido && campoAceite.checked;
-      botaoCadastro.disabled = !podeEnviar;
-      
-      return podeEnviar;
-    }
-    
-    // 📤 PROCESSAR ENVIO DO FORMULÁRIO
-    function configurarEnvioFormulario() {
-      const formulario = document.getElementById('formulario-cadastro');
-      const botaoCadastro = document.getElementById('botao-cadastro');
-      const mensagemCadastro = document.getElementById('mensagem-cadastro');
-      
-      if (!formulario || !botaoCadastro || !mensagemCadastro) {
-        console.error('❌ Elementos essenciais do formulário não encontrados');
-        return;
-      }
-      
-      formulario.addEventListener('submit', async function(evento) {
-        evento.preventDefault();
-        
-        console.log('📤 Iniciando processo de cadastro...');
-        
-        // Limpar mensagens anteriores
-        mensagemCadastro.textContent = '';
-        mensagemCadastro.className = 'mensagem';
-        
-        // Validação final
-        if (!validarFormulario()) {
-          mensagemCadastro.textContent = '❌ Por favor, corrija os erros no formulário';
-          mensagemCadastro.className = 'mensagem erro';
-          return;
-        }
-        
-        // Estado de carregamento
-        const textoOriginal = botaoCadastro.textContent;
-        botaoCadastro.disabled = true;
-        botaoCadastro.textContent = 'Criando conta...';
-        formulario.style.opacity = '0.7';
-        formulario.style.pointerEvents = 'none';
-        
-        try {
-          // Coletar dados do formulário
-          const formData = new FormData(formulario);
-          const dadosCadastro = {};
-          
-          formData.forEach((valor, chave) => {
-            dadosCadastro[chave] = valor;
-          });
-          
-          // Remover dados desnecessários
-          delete dadosCadastro.csrf_token;
-          delete dadosCadastro.confirmar;
-          
-          console.log('📋 Dados coletados:', {
-            nome: dadosCadastro.nome,
-            email: dadosCadastro.email,
-            telefone: dadosCadastro.telefone,
-            empresa: dadosCadastro.empresa || '(não informado)'
-          });
-          
-          // Enviar requisição
-          const resposta = await fetch('/api/cadastro', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(dadosCadastro)
-          });
-          
-          console.log(`📡 Resposta recebida: ${resposta.status} ${resposta.statusText}`);
-          
-          const resultado = await resposta.json();
-          
-          if (!resposta.ok) {
-            throw new Error(resultado.erro || resultado.mensagem || 'Erro desconhecido no servidor');
-          }
-          
-          // Sucesso
-          console.log('✅ Cadastro realizado com sucesso:', resultado);
-          
-          mensagemCadastro.textContent = '✅ Conta criada com sucesso! Redirecionando para o login...';
-          mensagemCadastro.className = 'mensagem sucesso';
-          
-          // Redirecionar após 3 segundos
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 3000);
-          
-        } catch (erro) {
-          console.error('❌ Erro no cadastro:', erro);
-          
-          let mensagemErro = '❌ Erro ao criar conta. Tente novamente.';
-          
-          if (erro.message.includes('já está cadastrado')) {
-            mensagemErro = '❌ Este e-mail já está cadastrado. Tente fazer login.';
-          } else if (erro.message.includes('senha')) {
-            mensagemErro = '❌ A senha deve ter pelo menos 8 caracteres.';
-          } else if (erro.message) {
-            mensagemErro = `❌ ${erro.message}`;
-          }
-          
-          mensagemCadastro.textContent = mensagemErro;
-          mensagemCadastro.className = 'mensagem erro';
-          
-          // Restaurar estado do formulário
-          botaoCadastro.disabled = false;
-          botaoCadastro.textContent = textoOriginal;
-          formulario.style.opacity = '';
-          formulario.style.pointerEvents = '';
-        }
-      });
-    }
-    
-    // 👂 CONFIGURAR EVENT LISTENERS
-    function configurarEventListeners() {
-      const formulario = document.getElementById('formulario-cadastro');
-      const campoSenha = document.getElementById('campo-senha');
-      const campoConfirmar = document.getElementById('campo-confirmar');
-      
-      if (!formulario) return;
-      
-      // Ativar validação após primeira tentativa
-      formulario.addEventListener('submit', () => {
-        validacaoAtiva = true;
-      }, { once: true });
-      
-      // Validação em tempo real
-      formulario.addEventListener('input', validarFormulario);
-      formulario.addEventListener('change', validarFormulario);
-      
-      // Validação específica das senhas
-      if (campoSenha) {
-        campoSenha.addEventListener('input', validarConfirmacaoSenha);
-      }
-      
-      if (campoConfirmar) {
-        campoConfirmar.addEventListener('input', validarConfirmacaoSenha);
-      }
-    }
-    
-    // 🚀 INICIALIZAÇÃO PRINCIPAL
-    function inicializarCadastro() {
-      console.log('🚀 Inicializando sistema de cadastro NeoRastro...');
-      
-      // Verificar se já está logado
-      const token = localStorage.getItem('neorastro_token');
-      const usuario = localStorage.getItem('neorastro_usuario');
-      
-      if (token && usuario) {
-        console.log('👤 Usuário já logado, redirecionando...');
-        window.location.href = 'painel.html';
-        return;
-      }
-      
-      try {
-        // Configurar todas as funcionalidades
-        configurarAlternarSenha();
-        configurarMedidorForca();
-        configurarFormatacaoTelefone();
-        configurarEnvioFormulario();
-        configurarEventListeners();
-        
-        // Validação inicial
-        validarFormulario();
-        
-        console.log('✅ Sistema de cadastro configurado com sucesso!');
-        
-      } catch (erro) {
-        console.error('❌ Erro na inicialização:', erro);
-      }
-    }
-    
-    // 🎯 AGUARDAR CARREGAMENTO DO DOM
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', inicializarCadastro);
-    } else {
-      inicializarCadastro();
-    }
-    
-  </script>
+    input[aria-invalid="true"]{border-color:#ef4444}
+    .campo{position:relative}
+    .botao-alternar-senha{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#93c5fd;cursor:pointer;font-size:1rem}
+    .linha{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+    @media (max-width:520px){.linha{grid-template-columns:1fr}}
+    .mensagem{display:block;padding:10px;border-radius:10px;font-size:.95rem}
+    .mensagem:empty{display:none}
+    .mensagem.erro{background:#fee2e2;color:#7f1d1d}
+    .mensagem.sucesso{background:#dcfce7;color:#14532d}
+    .forca{display:flex;gap:6px;align-items:center}
+    .forca progress{width:100%;height:6px}
+    .consentimento{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--cor-suave)}
+    button[type="submit"]{padding:12px 16px;border-radius:12px;border:0;background:linear-gradient(180deg,var(--cor-marca),var(--cor-marca-escura));color:white;font-weight:600;cursor:pointer}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .rodape{text-align:center;margin-top:10px;color:var(--cor-suave)}
+    .erro-campo{color:#fecaca;font-size:.85rem;margin-top:4px}
+  </style>
+</head>
+<body>
+  <div class="sobreposicao">
+    <main>
+      <header>
+        <h1>NeoRastro</h1>
+        <p>Rastreie seus veículos com segurança e tecnologia.</p>
+      </header>
+
+      <section class="cartao-escuro" aria-labelledby="titulo-cadastro">
+        <h2 id="titulo-cadastro">Crie sua conta</h2>
+        <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
+
+        <form id="formulario-cadastro" method="post" action="/api/cadastro" autocomplete="on" novalidate>
+          <input type="hidden" id="csrf-token" name="csrf_token" value="">
+
+          <label class="so-leitor" for="campo-nome">Nome completo</label>
+          <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required autocomplete="name" minlength="3" />
+
+          <label class="so-leitor" for="campo-email">E-mail</label>
+          <input id="campo-email" name="email" type="email" placeholder="E-mail" required autocomplete="email" inputmode="email" autocapitalize="off" />
+
+          <div class="linha">
+            <div>
+              <label class="so-leitor" for="campo-telefone">Telefone</label>
+              <input id="campo-telefone" name="telefone" type="tel" placeholder="Telefone (com DDD)" required
+                     autocomplete="tel" inputmode="tel"
+                     pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"
+                     aria-describedby="erro-telefone" />
+              <div id="erro-telefone" class="erro-campo" hidden>Use um formato como (11) 91234-5678.</div>
+            </div>
+            <div>
+              <label class="so-leitor" for="campo-empresa">Empresa</label>
+              <input id="campo-empresa" name="empresa" type="text" placeholder="Empresa (opcional)" autocomplete="organization" />
+            </div>
+          </div>
+
+          <div class="campo">
+            <label class="so-leitor" for="campo-senha">Senha</label>
+            <input id="campo-senha" name="senha" type="password" placeholder="Crie uma senha" required autocomplete="new-password" minlength="8" aria-describedby="rotulo-forca" />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-senha" aria-pressed="false">👁️</button>
+          </div>
+
+          <div class="forca">
+            <progress id="forca-senha" value="0" max="4" aria-hidden="true"></progress>
+            <small id="rotulo-forca" aria-live="polite">Força: —</small>
+          </div>
+
+          <div class="campo">
+            <label class="so-leitor" for="campo-confirmar">Confirmar senha</label>
+            <input id="campo-confirmar" name="confirmar" type="password" placeholder="Confirme a senha" required autocomplete="new-password" minlength="8" />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-confirmar" aria-pressed="false">👁️</button>
+          </div>
+
+          <label class="consentimento">
+            <input id="campo-aceite" name="aceite" type="checkbox" required />
+            <span>Concordo com os <a href="/termos">Termos</a> e a <a href="/privacidade">Política de Privacidade</a>.</span>
+          </label>
+
+          <button id="botao-cadastro" type="submit" disabled>Criar conta</button>
+        </form>
+        <p class="rodape">Já tem conta? <a href="login.html">Entrar</a></p>
+      </section>
+    </main>
+  </div>
+
+  <noscript>
+    <div style="max-width:480px;margin:16px auto;color:#fecaca;text-align:center">
+      Habilite o JavaScript para concluir o cadastro.
+    </div>
+  </noscript>
+
+  <script defer src="/static/js/cadastro.js"></script>
 </body>
 </html>
