@@ -1,0 +1,22 @@
+### Teste 1 - Cadastro de usuário
+POST http://127.0.0.1:5000/cadastro
+Content-Type: application/json
+
+{
+  "nome": "Jadson",
+  "email": "jadson@teste.com",
+  "senha": "123456"
+}
+
+### Teste 2 - Login
+POST http://127.0.0.1:5000/login
+Content-Type: application/json
+
+{
+  "email": "jadson@teste.com",
+  "senha": "123456"
+}
+
+### Teste 3 - Listar veículos (precisa de token do login)
+GET http://127.0.0.1:5000/veiculos
+Authorization: Bearer COLE_SEU_TOKEN_AQUI
