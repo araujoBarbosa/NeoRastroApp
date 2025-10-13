@@ -1,5 +1,8 @@
 "use strict";
 
+/* ===== Configuração geral da API ===== */
+const API_BASE = "https://api.neorastro.cloud";
+
 /* ===== Avisos rápidos (Toast) ===== */
 function mostrarAviso(mensagem, tempo = 2500) {
   const elemento = document.getElementById("mensagem-aviso");
@@ -13,7 +16,7 @@ function mostrarAviso(mensagem, tempo = 2500) {
 /* ===== Sessão e saída ===== */
 async function pegarSessao() {
   try {
-    const resposta = await fetch("/api/me", { credentials: "include" });
+    const resposta = await fetch(`${API_BASE}/me`, { credentials: "include" });
     if (!resposta.ok) throw 0;
     return await resposta.json().catch(() => null);
   } catch {
@@ -23,7 +26,7 @@ async function pegarSessao() {
 
 async function sairSistema() {
   try {
-    await fetch("/api/logout", { method: "POST", credentials: "include" });
+    await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
   } catch {}
   sessionStorage.clear();
   localStorage.removeItem("usuarioNome");
@@ -32,11 +35,16 @@ async function sairSistema() {
 
 /* ===== Funções auxiliares de API ===== */
 async function api(caminho, opcoes = {}) {
-  const resposta = await fetch(caminho, {
+  const url = caminho.startsWith("http")
+    ? caminho
+    : `${API_BASE}${caminho.startsWith("/") ? caminho : "/" + caminho}`;
+
+  const resposta = await fetch(url, {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     ...opcoes,
   });
+
   const dados = await resposta.json().catch(() => ({}));
   if (!resposta.ok)
     throw new Error(dados.erro || dados.mensagem || "Erro desconhecido");
@@ -49,7 +57,10 @@ async function bloquearVeiculo(id) {
   try {
     await api(`/veiculos/${id}/comando`, {
       method: "POST",
-      body: JSON.stringify({ tipo: "BLOQUEIO", motivo: "Solicitação do usuário" }),
+      body: JSON.stringify({
+        tipo: "BLOQUEIO",
+        motivo: "Solicitação do usuário",
+      }),
     });
     mostrarAviso("Comando de bloqueio enviado!");
     await listarComandos();
@@ -63,7 +74,10 @@ async function desbloquearVeiculo(id) {
   try {
     await api(`/veiculos/${id}/comando`, {
       method: "POST",
-      body: JSON.stringify({ tipo: "DESBLOQUEIO", motivo: "Solicitação do usuário" }),
+      body: JSON.stringify({
+        tipo: "DESBLOQUEIO",
+        motivo: "Solicitação do usuário",
+      }),
     });
     mostrarAviso("Comando de desbloqueio enviado!");
     await listarComandos();
@@ -178,6 +192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.href = "login.html";
     return;
   }
+
   const nome =
     usuario.nome || sessionStorage.getItem("usuarioNome") || "usuário";
   document.getElementById("bem-vindo").textContent = `Olá, ${nome}!`;
@@ -187,5 +202,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   listarVeiculos();
   listarComandos();
 
-  document.getElementById("botao-atualizar-comandos").addEventListener("click", listarComandos);
+  document
+    .getElementById("botao-atualizar-comandos")
+    .addEventListener("click", listarComandos);
 });
+
