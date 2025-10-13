@@ -7,22 +7,21 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro — Cadastro</title>
 
+  <!-- ✅ Permitir comunicação com a API -->
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
+    default-src 'self' data:;
     img-src 'self' data:;
     style-src 'self' 'unsafe-inline';
-    script-src 'self';
-    connect-src 'self';
+    script-src 'self' 'unsafe-inline';
+    connect-src 'self' https://api.neorastro.cloud;
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests
+    upgrade-insecure-requests;
   ">
+
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-  <meta name="csrf-token" content="{{CSRF_TOKEN}}" />
-
-  <link rel="preload" as="image" href="imagem-principal.jpg" />
   <style>
     :root {
       --cor-fundo:#0b1220; --cor-fundo-2:#0f172a; --cor-cartao:rgba(255,255,255,0.08);
@@ -81,50 +80,37 @@
         <h2 id="titulo-cadastro">Crie sua conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
-        <form id="formulario-cadastro" method="post" action="/api/cadastro" autocomplete="on" novalidate>
-          <input type="hidden" id="csrf-token" name="csrf_token" value="">
-
+        <!-- ✅ Removido action local -->
+        <form id="formulario-cadastro" autocomplete="on" novalidate>
           <label class="so-leitor" for="campo-nome">Nome completo</label>
-          <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required autocomplete="name" minlength="3" />
+          <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required minlength="3" />
 
           <label class="so-leitor" for="campo-email">E-mail</label>
-          <input id="campo-email" name="email" type="email" placeholder="E-mail" required autocomplete="email" inputmode="email" autocapitalize="off" />
+          <input id="campo-email" name="email" type="email" placeholder="E-mail" required />
 
           <div class="linha">
             <div>
-              <label class="so-leitor" for="campo-telefone">Telefone</label>
               <input id="campo-telefone" name="telefone" type="tel" placeholder="Telefone (com DDD)" required
-                     autocomplete="tel" inputmode="tel"
-                     pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"
-                     aria-describedby="erro-telefone" />
-              <div id="erro-telefone" class="erro-campo" hidden>Use um formato como (11) 91234-5678.</div>
+                     pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$" />
             </div>
             <div>
-              <label class="so-leitor" for="campo-empresa">Empresa</label>
-              <input id="campo-empresa" name="empresa" type="text" placeholder="Empresa (opcional)" autocomplete="organization" />
+              <input id="campo-empresa" name="empresa" type="text" placeholder="Empresa (opcional)" />
             </div>
           </div>
 
           <div class="campo">
-            <label class="so-leitor" for="campo-senha">Senha</label>
-            <input id="campo-senha" name="senha" type="password" placeholder="Crie uma senha" required autocomplete="new-password" minlength="8" aria-describedby="rotulo-forca" />
-            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-senha" aria-pressed="false">👁️</button>
-          </div>
-
-          <div class="forca">
-            <progress id="forca-senha" value="0" max="4" aria-hidden="true"></progress>
-            <small id="rotulo-forca" aria-live="polite">Força: —</small>
+            <input id="campo-senha" name="senha" type="password" placeholder="Crie uma senha" required minlength="8" />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-senha">👁️</button>
           </div>
 
           <div class="campo">
-            <label class="so-leitor" for="campo-confirmar">Confirmar senha</label>
-            <input id="campo-confirmar" name="confirmar" type="password" placeholder="Confirme a senha" required autocomplete="new-password" minlength="8" />
-            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-confirmar" aria-pressed="false">👁️</button>
+            <input id="campo-confirmar" name="confirmar" type="password" placeholder="Confirme a senha" required minlength="8" />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-confirmar">👁️</button>
           </div>
 
           <label class="consentimento">
             <input id="campo-aceite" name="aceite" type="checkbox" required />
-            <span>Concordo com os <a href="/termos">Termos</a> e a <a href="/privacidade">Política de Privacidade</a>.</span>
+            <span>Concordo com os <a href="#">Termos</a> e a <a href="#">Política de Privacidade</a>.</span>
           </label>
 
           <button id="botao-cadastro" type="submit" disabled>Criar conta</button>
@@ -134,12 +120,72 @@
     </main>
   </div>
 
-  <noscript>
-    <div style="max-width:480px;margin:16px auto;color:#fecaca;text-align:center">
-      Habilite o JavaScript para concluir o cadastro.
-    </div>
-  </noscript>
+  <script>
+    // Mostrar / ocultar senha
+    document.querySelectorAll(".botao-alternar-senha").forEach(botao => {
+      botao.addEventListener("click", () => {
+        const id = botao.getAttribute("aria-controls");
+        const campo = document.getElementById(id);
+        if (!campo) return;
+        campo.type = campo.type === "password" ? "text" : "password";
+        botao.textContent = campo.type === "password" ? "👁️" : "🙈";
+      });
+    });
 
-  <script defer src="/static/js/cadastro.js"></script>
+    // Função de cadastro
+    const form = document.getElementById("formulario-cadastro");
+    const msg = document.getElementById("mensagem-cadastro");
+    const botao = document.getElementById("botao-cadastro");
+
+    form.addEventListener("input", () => {
+      botao.disabled = !form.checkValidity();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "⏳ Enviando dados...";
+      msg.className = "mensagem";
+
+      const dados = {
+        nome: form.nome.value.trim(),
+        email: form.email.value.trim(),
+        telefone: form.telefone.value.trim(),
+        empresa: form.empresa.value.trim(),
+        senha: form.senha.value.trim(),
+        confirmar: form.confirmar.value.trim(),
+      };
+
+      if (dados.senha !== dados.confirmar) {
+        msg.textContent = "❌ As senhas não coincidem.";
+        msg.className = "mensagem erro";
+        return;
+      }
+
+      try {
+        const resposta = await fetch("https://api.neorastro.cloud/cadastro", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        });
+
+        const resultado = await resposta.json();
+
+        if (resposta.ok) {
+          msg.textContent = "✅ Cadastro realizado com sucesso! Redirecionando...";
+          msg.className = "mensagem sucesso";
+          setTimeout(() => window.location.href = "login.html", 1500);
+        } else {
+          msg.textContent = "❌ " + (resultado.mensagem || "Erro ao cadastrar.");
+          msg.className = "mensagem erro";
+        }
+      } catch (erro) {
+        console.error(erro);
+        msg.textContent = "⚠️ Erro ao conectar com o servidor.";
+        msg.className = "mensagem erro";
+      }
+    });
+  </script>
 </body>
 </html>
+
+
