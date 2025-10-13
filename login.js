@@ -57,7 +57,8 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
-        const resposta = await fetch("/api/login", {
+        // 🔧 CORRIGIDO: envia para seu servidor real
+        const resposta = await fetch("https://api.neorastro.cloud/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, senha }),
@@ -119,3 +120,4 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
+
