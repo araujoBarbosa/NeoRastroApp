@@ -6,14 +6,49 @@
   <title>NeoRastro — Login</title>
   <style>
     body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: url('https://i.imgur.com/sy4vBvG.jpeg') no-repeat center center/cover;
-      font-family: Arial, sans-serif;
-      color: #e5e7eb;
+      <body class="pagina--autenticacao">
+  <div class="sobreposicao">
+    <main class="container" style="display:grid;place-items:center;min-height:80dvh">
+      <section class="secao-formulario cartao-escuro" aria-labelledby="titulo-login">
+
+        <h1 class="nome-empresa">NeoRastro</h1>
+        <h2 id="titulo-login" class="titulo-login">Faça seu Login</h2>
+
+        <div id="mensagem-login" class="mensagem" role="status" aria-live="polite"></div>
+
+        <form id="formulario-entrada" method="post" action="/api/login" autocomplete="on" novalidate>
+          <label class="so-leitor" for="campo-email">E-mail</label>
+          <input id="campo-email" name="email" type="email" placeholder="Seu e-mail"
+                 inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required />
+
+          <div class="campo-senha">
+            <label class="so-leitor" for="campo-senha">Senha</label>
+            <input id="campo-senha" name="senha" type="password" placeholder="Sua senha"
+                   autocomplete="current-password" required />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha"
+                    aria-controls="campo-senha" aria-pressed="false">👁️</button>
+          </div>
+
+          <div class="linha-login">
+            <label class="lembrar-dispositivo">
+              <input id="campo-lembrar" name="lembrar" type="checkbox" />
+              <span>Lembrar de mim neste dispositivo</span>
+            </label>
+            <button id="botao-entrar" type="submit" disabled>Entrar</button>
+          </div>
+        </form>
+
+        <div class="links" style="margin-top:.75rem">
+          <a href="recuperar.html" rel="nofollow">Esqueci minha senha</a>
+          <a href="cadastro.html">Criar conta</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="login.js" defer></script>
+</body>
+
     }
 
     .fundo-escuro {
@@ -178,5 +213,6 @@
 
 </body>
 </html>
+
 
 
