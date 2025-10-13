@@ -3,41 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
   <title>NeoRastro — Login</title>
   <link rel="stylesheet" href="estilo.css" />
   <style>
-    /* Ajustes visuais locais */
     .so-leitor { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
     .links { display:flex; justify-content:space-between; align-items:center; font-size:.95rem; }
-    .links a { color:#93c5fd; text-decoration:none; }
-    .links a:hover { text-decoration:underline; }
-    .mensagem { display:block; padding:10px; border-radius:10px; font-size:.95rem; }
-    .mensagem:empty { display:none; }
-    .mensagem.erro { background:#fee2e2; color:#7f1d1d; }
-    .mensagem.sucesso { background:#dcfce7; color:#14532d; }
-    .campo-senha { position:relative; }
+    .links a { color:#93c5fd; text-decoration:none }
+    .links a:hover { text-decoration:underline }
+    .mensagem { display:block; padding:10px; border-radius:10px; font-size:.95rem }
+    .mensagem:empty { display:none }
+    .mensagem.erro { background:#fee2e2; color:#7f1d1d }
+    .mensagem.sucesso { background:#dcfce7; color:#14532d }
+    .campo-senha { position:relative }
     .botao-alternar-senha {
       position:absolute; right:10px; top:50%; transform:translateY(-50%);
       background:none; border:0; color:#93c5fd; cursor:pointer; font-size:1.05rem;
     }
+
+    /* Nome da empresa */
     .nome-empresa {
-      font-size: 2rem; font-weight: 800; text-align: center;
-      margin-bottom: 10px; color: #1d4ed8; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #1d4ed8;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     }
+
+    /* Subtítulo */
     .titulo-login {
-      font-size: 1.3rem; text-align: center; margin-bottom: 20px;
-      color: #22c55e; font-weight: 600;
+      font-size: 1.3rem;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #22c55e;
+      font-weight: 600;
     }
+
+    /* Linha com checkbox e botão */
     .linha-login {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 1rem; gap: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      gap: 1rem;
     }
     .lembrar-dispositivo {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .9rem; color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .9rem;
+      color: #e5e7eb;
     }
     .lembrar-dispositivo input[type="checkbox"] {
-      width: 16px; height: 16px; accent-color: #2563eb;
+      width: 16px;
+      height: 16px;
+      accent-color: #2563eb;
+    }
+    #botao-entrar {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -46,85 +73,117 @@
   <div class="sobreposicao">
     <main class="container" style="display:grid;place-items:center;min-height:80dvh">
       <section class="secao-formulario cartao-escuro" aria-labelledby="titulo-login">
+        
         <h1 class="nome-empresa">NeoRastro</h1>
         <h2 id="titulo-login" class="titulo-login">Faça seu Login</h2>
 
         <div id="mensagem-login" class="mensagem" role="status" aria-live="polite"></div>
 
-        <form id="formLogin" autocomplete="on" novalidate>
-          <label class="so-leitor" for="email">E-mail</label>
-          <input id="email" name="email" type="email" placeholder="Seu e-mail" required />
+        <form id="formulario-entrada" method="post" autocomplete="on" novalidate>
+          <label class="so-leitor" for="campo-email">E-mail</label>
+          <input id="campo-email" name="email" type="email" placeholder="Seu e-mail"
+                 inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required />
 
           <div class="campo-senha">
-            <label class="so-leitor" for="senha">Senha</label>
-            <input id="senha" name="senha" type="password" placeholder="Sua senha" required />
-            <button type="button" class="botao-alternar-senha" id="toggleSenha">👁️</button>
+            <label class="so-leitor" for="campo-senha">Senha</label>
+            <input id="campo-senha" name="senha" type="password" placeholder="Sua senha"
+                   autocomplete="current-password" required />
+            <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha"
+                    aria-controls="campo-senha" aria-pressed="false">👁️</button>
           </div>
 
           <div class="linha-login">
             <label class="lembrar-dispositivo">
-              <input id="lembrar" type="checkbox" /> <span>Lembrar de mim</span>
+              <input id="campo-lembrar" name="lembrar" type="checkbox" />
+              <span>Lembrar de mim neste dispositivo</span>
             </label>
-            <button id="botao-entrar" type="submit">Entrar</button>
+            <button id="botao-entrar" type="submit" disabled>Entrar</button>
           </div>
         </form>
 
         <div class="links" style="margin-top:.75rem">
-          <a href="#">Esqueci minha senha</a>
+          <a href="recuperar.html" rel="nofollow">Esqueci minha senha</a>
           <a href="cadastro.html">Criar conta</a>
         </div>
       </section>
     </main>
   </div>
 
+  <noscript>
+    <div style="max-width:480px;margin:16px auto;color:#fecaca;text-align:center">
+      O JavaScript está desativado. Ative-o para fazer login.
+    </div>
+  </noscript>
+
   <script>
-    // Mostrar/ocultar senha
-    const senhaCampo = document.getElementById("senha");
-    const toggleSenha = document.getElementById("toggleSenha");
-    toggleSenha.addEventListener("click", () => {
-      const tipo = senhaCampo.type === "password" ? "text" : "password";
-      senhaCampo.type = tipo;
-      toggleSenha.textContent = tipo === "password" ? "👁️" : "🙈";
-    });
+    function ligarAlternarSenha(){
+      const botao = document.querySelector('.botao-alternar-senha');
+      const campo = document.getElementById('campo-senha');
+      if (!botao || !campo) return;
+      botao.addEventListener('click', ()=>{
+        const visivel = campo.type === 'text';
+        campo.type = visivel ? 'password' : 'text';
+        botao.textContent = visivel ? '👁️' : '🙈';
+        botao.setAttribute('aria-pressed', String(!visivel));
+        botao.setAttribute('aria-label', visivel ? 'Mostrar senha' : 'Ocultar senha');
+      });
+    }
 
-    // Login
-    const form = document.getElementById("formLogin");
-    const mensagem = document.getElementById("mensagem-login");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const senha = document.getElementById("senha").value.trim();
-      if (!email || !senha) {
-        mensagem.textContent = "⚠️ Preencha todos os campos.";
-        mensagem.className = "mensagem erro";
-        return;
-      }
-      mensagem.textContent = "🔄 Conectando...";
-      mensagem.className = "mensagem";
+    function iniciar(){
+      const formulario = document.getElementById('formulario-entrada');
+      const botao = document.getElementById('botao-entrar');
+      const mensagem = document.getElementById('mensagem-login');
+      const email = document.getElementById('campo-email');
+      const senha = document.getElementById('campo-senha');
 
-      try {
-        const resposta = await fetch("https://api.neorastro.cloud/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, senha }),
-        });
-        const dados = await resposta.json();
-        if (dados.status === "sucesso") {
-          mensagem.textContent = "✅ Login realizado com sucesso! Redirecionando...";
-          mensagem.className = "mensagem sucesso";
-          setTimeout(() => window.location.href = "painel.html", 1000);
-        } else {
-          mensagem.textContent = "❌ " + (dados.mensagem || "E-mail ou senha incorretos.");
-          mensagem.className = "mensagem erro";
+      const atualizarBotao = ()=>{
+        botao.disabled = !(email.value && senha.value);
+      };
+      formulario.addEventListener('input', atualizarBotao);
+
+      formulario.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        mensagem.textContent = '';
+        mensagem.classList.remove('erro','sucesso');
+        botao.disabled = true;
+        botao.dataset.label = botao.textContent;
+        botao.textContent = 'Entrando…';
+
+        try {
+          const resposta = await fetch('https://api.neorastro.cloud/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email.value.trim(),
+              senha: senha.value.trim(),
+              lembrar: document.getElementById('campo-lembrar').checked
+            }),
+          });
+
+          const dados = await resposta.json();
+          if (!resposta.ok) throw new Error(dados.mensagem || 'Credenciais inválidas.');
+
+          mensagem.textContent = '✅ Login realizado! Redirecionando…';
+          mensagem.classList.add('sucesso');
+          setTimeout(()=> window.location.href = 'painel.html', 600);
+
+        } catch (erro) {
+          mensagem.textContent = '❌ ' + (erro.message || 'Erro ao conectar.');
+          mensagem.classList.add('erro');
+          botao.textContent = botao.dataset.label || 'Entrar';
+          botao.disabled = false;
         }
-      } catch {
-        mensagem.textContent = "⚠️ Erro ao conectar ao servidor.";
-        mensagem.className = "mensagem erro";
-      }
-    });
+      });
+
+      atualizarBotao();
+      ligarAlternarSenha();
+    }
+
+    document.addEventListener('DOMContentLoaded', iniciar);
   </script>
 </body>
 </html>
+
 
 
 
