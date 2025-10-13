@@ -2,12 +2,14 @@
   "use strict";
 
   // =========================
-  // Configurações
+  // Configurações globais
   // =========================
+  const API_BASE = "https://api.neorastro.cloud";
+
   const API = {
-    listar: "http://127.0.0.1:5000/veiculos",
-    cadastrar: "http://127.0.0.1:5000/veiculos",
-    remover: (id) => `http://127.0.0.1:5000/veiculos/${id}`,
+    listar: `${API_BASE}/veiculos`,
+    cadastrar: `${API_BASE}/veiculos`,
+    remover: (id) => `${API_BASE}/veiculos/${id}`,
   };
 
   // =========================
@@ -27,16 +29,21 @@
 
   function sairSistema() {
     sessionStorage.clear();
+    localStorage.removeItem("usuarioNome");
     location.href = "login.html";
   }
 
   // =========================
-  // Comunicação com backend
+  // Comunicação com o backend
   // =========================
   async function listarVeiculos() {
     const token = pegarToken();
     const resposta = await fetch(API.listar, {
-      headers: { Authorization: "Bearer " + token },
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
     });
     if (!resposta.ok) throw new Error("Erro ao listar veículos");
     return await resposta.json();
@@ -50,8 +57,10 @@
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
+      credentials: "include",
       body: JSON.stringify({ nome, imei }),
     });
+    if (!resposta.ok) throw new Error("Erro ao cadastrar veículo");
     return await resposta.json();
   }
 
@@ -60,12 +69,14 @@
     const resposta = await fetch(API.remover(id), {
       method: "DELETE",
       headers: { Authorization: "Bearer " + token },
+      credentials: "include",
     });
+    if (!resposta.ok) throw new Error("Erro ao remover veículo");
     return await resposta.json();
   }
 
   // =========================
-  // Mensagens
+  // Mensagens visuais
   // =========================
   function mostrarMensagem(texto, erro = false) {
     const elemento = document.getElementById("mensagem-veiculo");
@@ -83,7 +94,7 @@
   }
 
   // =========================
-  // DOM
+  // Manipulação de DOM
   // =========================
   function renderizarVeiculos(lista) {
     const container = document.getElementById("lista-veiculos");
@@ -100,8 +111,8 @@
       const item = document.createElement("div");
       item.className = "veiculo-item";
       item.innerHTML = `
-        <strong>${v.nome}</strong> <br>
-        IMEI: ${v.imei} <br>
+        <strong>${v.nome}</strong><br>
+        IMEI: ${v.imei}<br>
         <button class="abrir">🔎 Abrir no painel</button>
         <button class="remover">🗑️ Remover</button>
       `;
@@ -115,9 +126,14 @@
       // Remover veículo
       item.querySelector(".remover").addEventListener("click", async () => {
         if (confirm(`Tem certeza que deseja remover o veículo ${v.nome}?`)) {
-          await removerVeiculo(v.id);
-          mostrarMensagem("✅ Veículo removido com sucesso!");
-          carregarVeiculos();
+          try {
+            await removerVeiculo(v.id);
+            mostrarMensagem("✅ Veículo removido com sucesso!");
+            carregarVeiculos();
+          } catch (erro) {
+            console.error("Erro ao remover veículo:", erro);
+            mostrarMensagem("❌ Erro ao remover veículo.", true);
+          }
         }
       });
 
@@ -188,3 +204,5 @@
     ligarFormulario();
   });
 })();
+
+
