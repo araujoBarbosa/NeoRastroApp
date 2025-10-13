@@ -2,15 +2,12 @@
 "use strict";
 
 function alternarVisibilidade(idDoCampo, botao) {
-  if (!idDoCampo || !botao) return;
   const campo = document.getElementById(idDoCampo);
-  if (!campo) return;
+  if (!campo || !botao) return;
+
   const visivel = campo.type === "text";
-  try {
-    campo.type = visivel ? "password" : "text";
-  } catch (_) {}
+  campo.type = visivel ? "password" : "text";
   botao.textContent = visivel ? "👁️" : "🙈";
-  botao.setAttribute("aria-pressed", String(!visivel));
   botao.setAttribute("aria-label", visivel ? "Mostrar senha" : "Ocultar senha");
 }
 
@@ -20,20 +17,20 @@ function alternarVisibilidade(idDoCampo, botao) {
     const formulario = document.getElementById("formulario-entrada");
     if (!formulario) return;
 
-    const campoEmail = document.getElementById("campo-email");
-    const campoSenha = document.getElementById("campo-senha");
-    const mensagem = document.getElementById("mensagem-login");
-    const botaoEntrar = document.getElementById("botao-entrar");
+    const campoEmail = document.getElementById("campo-email") || document.getElementById("email");
+    const campoSenha = document.getElementById("campo-senha") || document.getElementById("senha");
+    const botaoEntrar = document.getElementById("botao-entrar") || formulario.querySelector("button[type='submit']");
+    const mensagem = document.getElementById("mensagem-login") || document.getElementById("mensagem");
+    const botaoOlho = document.getElementById("toggleSenha");
+
+    // 👁️ Integrar o "olhinho" se existir
+    if (botaoOlho && campoSenha) {
+      botaoOlho.addEventListener("click", () => alternarVisibilidade(campoSenha.id, botaoOlho));
+    }
 
     if (!campoEmail || !campoSenha || !botaoEntrar) return;
 
-    // Acessibilidade para mensagem
-    if (mensagem) {
-      mensagem.setAttribute("role", "status");
-      mensagem.setAttribute("aria-live", "polite");
-    }
-
-    // Habilitar/desabilitar botão conforme os campos
+    // Atualiza botão
     const atualizarBotao = () => {
       const valido = !!campoEmail.value.trim() && !!campoSenha.value;
       botaoEntrar.disabled = !valido;
@@ -57,60 +54,52 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
-        // 🔧 CORRIGIDO: envia para seu servidor real
         const resposta = await fetch("https://api.neorastro.cloud/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, senha }),
         });
 
-        const dados = await resposta.json();
+        const dados = await resposta.json().catch(() => ({}));
 
         if (!resposta.ok) {
-          mostrarMensagem(dados.erro || "❌ E-mail ou senha incorretos.", true);
+          const erro = dados.erro || dados.mensagem || "❌ E-mail ou senha incorretos.";
+          mostrarMensagem(erro, true);
           setCarregando(false);
           return;
         }
 
-        // Sucesso
         mostrarMensagem("✅ Login realizado com sucesso! Redirecionando…", false);
 
-        // Guarda dados no navegador
-        sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario));
-        sessionStorage.setItem("token", dados.token);
+        sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario || { email }));
+        sessionStorage.setItem("token", dados.token || "");
 
-        // Redireciona para painel
         setTimeout(() => {
           window.location.href = "painel.html";
-        }, 600);
+        }, 800);
       } catch (erro) {
-        mostrarMensagem("❌ Erro ao conectar com o servidor.", true);
+        console.error("Erro de conexão:", erro);
+        mostrarMensagem("❌ Não foi possível conectar ao servidor.", true);
+      } finally {
         setCarregando(false);
       }
     });
 
+    // --- Funções auxiliares ---
     function setCarregando(ativo) {
       if (!botaoEntrar) return;
       botaoEntrar.disabled = !!ativo;
-      if (ativo) {
-        botaoEntrar.dataset.label = botaoEntrar.textContent || "Entrar";
-        botaoEntrar.textContent = "Entrando…";
-      } else {
-        botaoEntrar.textContent = botaoEntrar.dataset.label || "Entrar";
-      }
+      botaoEntrar.textContent = ativo ? "Entrando…" : "Entrar";
     }
 
     function limparMensagem() {
-      if (!mensagem) return;
-      mensagem.textContent = "";
-      mensagem.classList.remove("erro", "sucesso");
+      if (mensagem) mensagem.textContent = "";
     }
 
-    function mostrarMensagem(texto, ehErro) {
+    function mostrarMensagem(texto, erro = false) {
       if (!mensagem) return;
       mensagem.textContent = texto;
-      mensagem.classList.remove("erro", "sucesso");
-      mensagem.classList.add(ehErro ? "erro" : "sucesso");
+      mensagem.style.color = erro ? "#f87171" : "#4ade80";
     }
   };
 
@@ -120,4 +109,5 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
+
 
