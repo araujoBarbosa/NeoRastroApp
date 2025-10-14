@@ -25,38 +25,119 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
 
   <style>
-    body { background:#0b1120; color:#e5e7eb; margin:0; font-family:system-ui,sans-serif; }
-    header.painel-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#111827; border-bottom:1px solid #1f2937; position:sticky; top:0; z-index:10; }
+    body {
+      background:#0b1120; color:#e5e7eb; margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* ===== Cabeçalho ===== */
+    header.painel-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 20px; background:#111827; border-bottom:1px solid #1f2937;
+      position:sticky; top:0; z-index:10;
+    }
     header .marca { display:flex; align-items:center; gap:10px; }
     header .marca h1 { font-size:1.2rem; font-weight:600; margin:0; }
     header .acoes-header { display:flex; align-items:center; gap:10px; }
-    header button { background:#1d4ed8; color:#fff; border:0; padding:6px 12px; border-radius:8px; cursor:pointer; }
+    header button {
+      background:#1d4ed8; color:#fff; border:0;
+      padding:6px 12px; border-radius:8px; cursor:pointer;
+      transition: background 0.2s;
+    }
     header button:hover { background:#2563eb; }
 
-    main { display:grid; grid-template-columns:320px 1fr; gap:16px; padding:16px; height:calc(100vh - 64px); box-sizing:border-box; }
-    aside.painel-lateral { background:#111827; border-radius:12px; padding:16px; overflow-y:auto; box-shadow:0 0 12px rgba(0,0,0,0.3); }
+    /* ===== Layout principal ===== */
+    main {
+      display:grid; grid-template-columns:320px 1fr; gap:16px;
+      padding:16px; height:calc(100vh - 64px); box-sizing:border-box;
+    }
+    aside.painel-lateral {
+      background:#111827; border-radius:12px; padding:16px;
+      overflow-y:auto; box-shadow:0 0 12px rgba(0,0,0,0.3);
+    }
     aside h2, aside h3 { margin-top:0; }
 
-    .veiculo { background:#1f2937; border-radius:10px; padding:10px; margin-bottom:10px; box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+    /* ===== Cartões de veículo ===== */
+    .veiculo {
+      background:#1f2937; border-radius:10px; padding:10px; margin-bottom:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+    }
     .veiculo strong { font-size:1rem; display:block; color:#fff; }
     .veiculo small { color:#9ca3af; }
-    .grupo-botoes { display:flex; gap:6px; margin-top:8px; }
-    .botao { flex:1; padding:6px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:500; }
+    .grupo-botoes {
+      display:flex; gap:8px; margin-top:8px;
+    }
+    .botao {
+      flex:1; padding:10px; border-radius:8px; border:0; cursor:pointer;
+      font-weight:500; font-size:.9rem;
+      transition: transform .15s ease, background .2s ease;
+    }
+    .botao:active { transform: scale(0.96); }
     .botao-bloquear { background:#dc2626; color:#fff; }
     .botao-bloquear:hover { background:#b91c1c; }
     .botao-desbloquear { background:#16a34a; color:#fff; }
     .botao-desbloquear:hover { background:#15803d; }
 
-    #mapa-rastreamento { height:100%; width:100%; border-radius:12px; }
-    #lista-comandos { list-style:none; padding:0; font-size:.9rem; max-height:200px; overflow:auto; }
-    #lista-comandos li { padding:4px 0; border-bottom:1px solid #1f2937; }
+    /* ===== Mapa ===== */
+    #mapa-rastreamento {
+      height:100%; width:100%; border-radius:12px;
+      box-shadow:0 0 12px rgba(0,0,0,0.3);
+    }
 
-    #mensagem-aviso { position:fixed; bottom:20px; right:20px; background:#1d4ed8; color:#fff; padding:10px 16px; border-radius:10px; display:none; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    /* ===== Histórico ===== */
+    #lista-comandos {
+      list-style:none; padding:0; font-size:.9rem;
+      max-height:200px; overflow:auto; margin-bottom:10px;
+    }
+    #lista-comandos li {
+      padding:6px 0; border-bottom:1px solid #1f2937;
+      color:#cbd5e1;
+    }
 
-    @media (max-width:800px) {
-      main { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-      aside.painel-lateral { order:2; height:auto; }
-      #mapa-rastreamento { height:60vh; }
+    /* ===== Mensagem de aviso ===== */
+    #mensagem-aviso {
+      position:fixed; bottom:20px; right:20px;
+      background:#1d4ed8; color:#fff; padding:10px 16px;
+      border-radius:10px; display:none; box-shadow:0 2px 10px rgba(0,0,0,0.3);
+      font-size:.95rem;
+    }
+
+    /* ===== Responsividade (Celular / Tablet) ===== */
+    @media (max-width:900px) {
+      main {
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        padding:10px;
+        height:auto;
+      }
+      #mapa-rastreamento {
+        height:60vh;
+        margin-bottom:12px;
+      }
+      aside.painel-lateral {
+        height:auto;
+        padding:14px;
+      }
+      .veiculo {
+        padding:12px;
+      }
+      .grupo-botoes {
+        flex-direction:column;
+      }
+      .botao {
+        width:100%;
+        font-size:1rem;
+        padding:12px;
+      }
+      header.painel-header {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
+      }
+      header .acoes-header {
+        width:100%;
+        justify-content:space-between;
+      }
     }
   </style>
 </head>
@@ -74,6 +155,8 @@
   </header>
 
   <main>
+    <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
+
     <aside class="painel-lateral">
       <h2>Meus veículos</h2>
       <div id="lista-veiculos"></div>
@@ -82,11 +165,9 @@
       <ul id="lista-comandos"></ul>
       <button id="botao-atualizar-comandos" class="botao" style="background:#374151;color:#fff;">Atualizar histórico</button>
     </aside>
-
-    <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
   </main>
 
-  <div id="mensagem-aviso" class="aviso" role="status" aria-live="polite"></div>
+  <div id="mensagem-aviso" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script src="painel.js"></script>
