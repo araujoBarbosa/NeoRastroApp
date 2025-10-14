@@ -23,14 +23,14 @@ function alternarVisibilidade(idDoCampo, botao) {
     const mensagem = document.getElementById("mensagem-login") || document.getElementById("mensagem");
     const botaoOlho = document.getElementById("toggleSenha");
 
-    // 👁️ Integrar o "olhinho" se existir
+    // 👁️ Ativar o "olhinho"
     if (botaoOlho && campoSenha) {
       botaoOlho.addEventListener("click", () => alternarVisibilidade(campoSenha.id, botaoOlho));
     }
 
     if (!campoEmail || !campoSenha || !botaoEntrar) return;
 
-    // Atualiza botão
+    // --- Ativa o botão apenas quando os campos estiverem preenchidos
     const atualizarBotao = () => {
       const valido = !!campoEmail.value.trim() && !!campoSenha.value;
       botaoEntrar.disabled = !valido;
@@ -38,7 +38,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     formulario.addEventListener("input", atualizarBotao);
     atualizarBotao();
 
-    // Envio do formulário
+    // --- Envio do formulário
     formulario.addEventListener("submit", async (evento) => {
       evento.preventDefault();
 
@@ -54,9 +54,12 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
+        // ✅ Comunicação com backend Flask segura
         const resposta = await fetch("https://api.neorastro.cloud/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          mode: "cors",
+          credentials: "omit",
           body: JSON.stringify({ email, senha }),
         });
 
@@ -71,6 +74,7 @@ function alternarVisibilidade(idDoCampo, botao) {
 
         mostrarMensagem("✅ Login realizado com sucesso! Redirecionando…", false);
 
+        // Guarda sessão temporária
         sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario || { email }));
         sessionStorage.setItem("token", dados.token || "");
 
@@ -93,7 +97,10 @@ function alternarVisibilidade(idDoCampo, botao) {
     }
 
     function limparMensagem() {
-      if (mensagem) mensagem.textContent = "";
+      if (mensagem) {
+        mensagem.textContent = "";
+        mensagem.style.color = "";
+      }
     }
 
     function mostrarMensagem(texto, erro = false) {
@@ -109,5 +116,6 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
+
 
 
