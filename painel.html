@@ -7,13 +7,13 @@
   <meta name="theme-color" content="#1d4ed8" />
   <title>NeoRastro — Painel</title>
 
-  <!-- Permitir comunicação com o backend -->
+  <!-- ✅ Política de segurança corrigida -->
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self' data:;
-    img-src 'self' data:;
-    style-src 'self' 'unsafe-inline';
-    script-src 'self' 'unsafe-inline';
-    connect-src 'self' https://api.neorastro.cloud;
+    default-src 'self' data: blob:;
+    img-src 'self' data: https://*;
+    style-src 'self' 'unsafe-inline' https://unpkg.com;
+    script-src 'self' 'unsafe-inline' https://unpkg.com;
+    connect-src 'self' https://api.neorastro.cloud https://{s}.tile.openstreetmap.org;
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
@@ -29,6 +29,7 @@
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     crossorigin="anonymous"
   />
+
   <style>
     main { display:grid; grid-template-columns: 320px 1fr; gap:16px; }
     #mapa-rastreamento { height: calc(100vh - 90px); border-radius:12px; }
@@ -45,10 +46,10 @@
     #lista-comandos li { margin:4px 0; }
   </style>
 </head>
+
 <body class="pagina--painel">
   <header class="painel-header container">
     <div class="marca">
-      <!-- ✅ Caminho relativo -->
       <img src="favicon.svg" alt="Logo NeoRastro" width="24" height="24" />
       <h1>NeoRastro — Painel</h1>
     </div>
@@ -59,7 +60,6 @@
   </header>
 
   <main class="container" style="padding:0">
-    <!-- Painel lateral com veículos e histórico -->
     <aside class="painel-lateral">
       <h2>Meus veículos</h2>
       <div id="lista-veiculos"></div>
@@ -69,7 +69,6 @@
       <button id="botao-atualizar-comandos" class="suave">Atualizar histórico</button>
     </aside>
 
-    <!-- Mapa -->
     <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
   </main>
 
@@ -81,8 +80,10 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- ✅ Script local -->
+  <!-- Script local -->
   <script src="painel.js"></script>
 </body>
 </html>
+
+
 
