@@ -3,21 +3,23 @@
 /* ===== Configuração da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Função auxiliar de avisos ===== */
-function mostrarAviso(mensagem, tempo = 3000, tipo = "info") {
+/* ===== Exibir avisos (toast) ===== */
+function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   const msg = document.getElementById("mensagem-aviso");
   if (!msg) return;
 
   msg.textContent = mensagem;
+  msg.className = `neo-toast neo-toast--${tipo}`;
   msg.style.display = "block";
-  msg.style.background =
-    tipo === "erro" ? "#b91c1c" : tipo === "sucesso" ? "#16a34a" : "#1d4ed8";
+  msg.style.animation = "neo-slide-in 0.3s ease-out";
 
-  clearTimeout(window.__msg);
-  window.__msg = setTimeout(() => (msg.style.display = "none"), tempo);
+  clearTimeout(window.__msgTimer);
+  window.__msgTimer = setTimeout(() => {
+    msg.style.display = "none";
+  }, tempo);
 }
 
-/* ===== Comunicação com a API ===== */
+/* ===== Função genérica para chamadas de API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -32,21 +34,26 @@ async function api(caminho, opcoes = {}) {
   return await resposta.json();
 }
 
-/* ===== Enviar comando ===== */
-async function enviarComando(id_veiculo, tipo) {
+/* ===== Enviar comando (bloquear/desbloquear) ===== */
+async function enviarComando(id_veiculo, tipo, botao) {
   try {
-    mostrarAviso(`Enviando comando "${tipo}"...`);
+    botao.classList.add("neo-btn--loading");
+    botao.disabled = true;
+    mostrarAviso(`Enviando comando "${tipo}"...`, "info");
 
     const resposta = await api("/comandos", {
       method: "POST",
       body: JSON.stringify({ tipo, id_veiculo }),
     });
 
-    mostrarAviso(resposta.mensagem || "Comando enviado!", 3000, "sucesso");
-    listarComandos(); // atualiza histórico
+    mostrarAviso(resposta.mensagem || "Comando enviado!", "success");
+    listarComandos(); // Atualiza histórico
   } catch (e) {
     console.error(e);
-    mostrarAviso("Erro ao enviar comando.", 4000, "erro");
+    mostrarAviso("Erro ao enviar comando.", "error");
+  } finally {
+    botao.classList.remove("neo-btn--loading");
+    botao.disabled = false;
   }
 }
 
@@ -54,80 +61,110 @@ async function enviarComando(id_veiculo, tipo) {
 async function listarVeiculos() {
   const container = document.getElementById("lista-veiculos");
   if (!container) return;
-  container.innerHTML = "<p>Carregando veículos...</p>";
+  container.innerHTML = `<div class="neo-loading">Carregando veículos...</div>`;
 
   try {
     const veiculos = await api("/veiculos");
     console.log("🔍 Veículos recebidos da API:", veiculos);
 
     if (!veiculos || veiculos.length === 0) {
-      container.innerHTML = "<p>Nenhum veículo encontrado.</p>";
+      container.innerHTML = `<div class="neo-historico__vazio">Nenhum veículo encontrado.</div>`;
       return;
     }
 
     container.innerHTML = "";
 
     veiculos.forEach((v) => {
+      const statusClass =
+        v.status === "ativo"
+          ? "neo-veiculo__status--ativo"
+          : v.status === "inativo"
+          ? "neo-veiculo__status--inativo"
+          : "neo-veiculo__status--desconhecido";
+
       const bloco = document.createElement("div");
-      bloco.className = "veiculo";
+      bloco.className = "neo-veiculo neo-fade-in";
       bloco.innerHTML = `
-        <div>
-          <strong>${v.modelo || "Sem modelo"}</strong>
-          <small>Placa: ${v.placa || "—"}</small><br>
-          <small>Status: ${v.status || "desconhecido"}</small>
+        <div class="neo-veiculo__info">
+          <span class="neo-veiculo__modelo">${v.modelo || "Sem modelo"}</span>
+          <div class="neo-veiculo__detalhe">
+            <i data-feather="hash"></i> Placa: ${v.placa || "—"}
+          </div>
+          <div class="neo-veiculo__detalhe">
+            <i data-feather="activity"></i> Status:
+            <span class="neo-veiculo__status ${statusClass}">
+              ${v.status || "desconhecido"}
+            </span>
+          </div>
         </div>
-        <div class="grupo-botoes">
-          <button class="botao botao-bloquear" data-id="${v.id}" data-tipo="bloquear">Bloquear</button>
-          <button class="botao botao-desbloquear" data-id="${v.id}" data-tipo="desbloquear">Desbloquear</button>
+        <div class="neo-veiculo__acoes">
+          <button class="neo-btn neo-btn--danger" data-id="${v.id}" data-tipo="bloquear">
+            <i data-feather="lock"></i> Bloquear
+          </button>
+          <button class="neo-btn neo-btn--success" data-id="${v.id}" data-tipo="desbloquear">
+            <i data-feather="unlock"></i> Desbloquear
+          </button>
         </div>
       `;
       container.appendChild(bloco);
     });
 
-    // Liga os botões
+    // Recarregar ícones Feather (necessário após inserir HTML)
+    if (typeof feather !== "undefined") feather.replace();
+
+    // Ativar eventos nos botões
     container.querySelectorAll("button[data-tipo]").forEach((botao) => {
-      botao.addEventListener("click", async (ev) => {
-        const tipo = ev.target.dataset.tipo;
-        const id = ev.target.dataset.id;
-        await enviarComando(id, tipo);
+      botao.addEventListener("click", async (e) => {
+        const tipo = e.target.closest("button").dataset.tipo;
+        const id = e.target.closest("button").dataset.id;
+        await enviarComando(id, tipo, e.target.closest("button"));
       });
     });
   } catch (e) {
     console.error(e);
-    container.innerHTML = "<p>Erro ao carregar veículos.</p>";
-    mostrarAviso("Falha ao conectar com a API.", 4000, "erro");
+    container.innerHTML = `<div class="neo-historico__vazio">Erro ao carregar veículos.</div>`;
+    mostrarAviso("Falha ao conectar com a API.", "error");
   }
 }
 
-/* ===== Histórico de comandos ===== */
+/* ===== Listar histórico de comandos ===== */
 async function listarComandos() {
   const lista = document.getElementById("lista-comandos");
   if (!lista) return;
-  lista.innerHTML = "<li>Carregando...</li>";
+  lista.innerHTML = `<li class="neo-loading">Carregando comandos...</li>`;
 
   try {
     const comandos = await api("/comandos");
     lista.innerHTML = "";
 
     if (!comandos.length) {
-      lista.innerHTML = "<li>Nenhum comando registrado.</li>";
+      lista.innerHTML = `<li class="neo-historico__vazio">Nenhum comando registrado.</li>`;
       return;
     }
 
     comandos.forEach((c) => {
       const li = document.createElement("li");
-      li.textContent = `#${c.id} • ${c.tipo} • ${c.status}`;
+      li.className = "neo-historico__item";
+      li.innerHTML = `
+        <i data-feather="${c.tipo === "bloquear" ? "lock" : "unlock"}"></i>
+        #${c.id} • ${c.tipo} • ${c.status}
+      `;
       lista.appendChild(li);
     });
-  } catch {
-    lista.innerHTML = "<li>Erro ao buscar comandos.</li>";
+
+    if (typeof feather !== "undefined") feather.replace();
+  } catch (e) {
+    console.error(e);
+    lista.innerHTML = `<li class="neo-historico__vazio">Erro ao buscar comandos.</li>`;
+    mostrarAviso("Erro ao carregar histórico.", "error");
   }
 }
 
-/* ===== Inicializar mapa ===== */
+/* ===== Inicializar mapa Leaflet ===== */
 let mapa;
 function iniciarMapa() {
   mapa = L.map("mapa-rastreamento").setView([-14.235, -51.9253], 4);
+
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution:
@@ -135,16 +172,20 @@ function iniciarMapa() {
   }).addTo(mapa);
 }
 
-/* ===== Inicialização ===== */
+/* ===== Inicialização da página ===== */
 document.addEventListener("DOMContentLoaded", () => {
-  document
-    .getElementById("botao-atualizar-comandos")
-    .addEventListener("click", listarComandos);
+  const botaoHistorico = document.getElementById("botao-atualizar-comandos");
+  if (botaoHistorico) {
+    botaoHistorico.addEventListener("click", listarComandos);
+  }
 
   iniciarMapa();
   listarVeiculos();
   listarComandos();
 
-  document.getElementById("bem-vindo").textContent = "Olá, usuário visitante!";
+  const spanBemVindo = document.getElementById("bem-vindo");
+  if (spanBemVindo) spanBemVindo.textContent = "Olá, usuário visitante!";
+
+  if (typeof feather !== "undefined") feather.replace();
 });
 
