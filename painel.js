@@ -1,39 +1,19 @@
 "use strict";
 
-/* ===== Configuração geral da API ===== */
+/* ===== Configuração da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Avisos rápidos (Toast) ===== */
-function mostrarAviso(mensagem, tempo = 2500) {
-  const elemento = document.getElementById("mensagem-aviso");
-  if (!elemento) return;
-  elemento.textContent = mensagem;
-  elemento.style.display = "block";
-  clearTimeout(window.__aviso);
-  window.__aviso = setTimeout(() => (elemento.style.display = "none"), tempo);
+/* ===== Função auxiliar de avisos ===== */
+function mostrarAviso(mensagem, tempo = 3000) {
+  const msg = document.getElementById("mensagem-aviso");
+  if (!msg) return;
+  msg.textContent = mensagem;
+  msg.style.display = "block";
+  clearTimeout(window.__msg);
+  window.__msg = setTimeout(() => (msg.style.display = "none"), tempo);
 }
 
-/* ===== Sessão e saída ===== */
-async function pegarSessao() {
-  try {
-    const resposta = await fetch(`${API_BASE}/me`, { credentials: "include" });
-    if (!resposta.ok) throw 0;
-    return await resposta.json().catch(() => null);
-  } catch {
-    return null;
-  }
-}
-
-async function sairSistema() {
-  try {
-    await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
-  } catch {}
-  sessionStorage.clear();
-  localStorage.removeItem("usuarioNome");
-  location.href = "login.html";
-}
-
-/* ===== Funções auxiliares de API ===== */
+/* ===== Comunicação com a API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -41,176 +21,95 @@ async function api(caminho, opcoes = {}) {
 
   const resposta = await fetch(url, {
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     ...opcoes,
   });
 
-  const dados = await resposta.json().catch(() => ({}));
-  if (!resposta.ok)
-    throw new Error(dados.erro || dados.mensagem || "Erro desconhecido");
-  return dados;
+  if (!resposta.ok) throw new Error("Erro ao acessar a API");
+  return await resposta.json();
 }
 
-/* ===== Bloqueio / Desbloqueio de veículo ===== */
-async function bloquearVeiculo(id) {
-  if (!confirm("Tem certeza que deseja BLOQUEAR este veículo?")) return;
-  try {
-    await api(`/veiculos/${id}/comando`, {
-      method: "POST",
-      body: JSON.stringify({
-        tipo: "BLOQUEIO",
-        motivo: "Solicitação do usuário",
-      }),
-    });
-    mostrarAviso("Comando de bloqueio enviado!");
-    await listarComandos();
-  } catch (e) {
-    mostrarAviso(e.message);
-  }
-}
+/* ===== Listar veículos ===== */
+async function listarVeiculos() {
+  const container = document.getElementById("lista-veiculos");
+  if (!container) return;
+  container.innerHTML = "<p>Carregando veículos...</p>";
 
-async function desbloquearVeiculo(id) {
-  if (!confirm("Deseja DESBLOQUEAR este veículo?")) return;
   try {
-    await api(`/veiculos/${id}/comando`, {
-      method: "POST",
-      body: JSON.stringify({
-        tipo: "DESBLOQUEIO",
-        motivo: "Solicitação do usuário",
-      }),
+    const veiculos = await api("/veiculos");
+    console.log("🔍 Veículos recebidos da API:", veiculos);
+
+    if (!veiculos || veiculos.length === 0) {
+      container.innerHTML = "<p>Nenhum veículo encontrado.</p>";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    veiculos.forEach((v) => {
+      const bloco = document.createElement("div");
+      bloco.className = "veiculo";
+      bloco.innerHTML = `
+        <div>
+          <strong>${v.modelo}</strong><br>
+          <small>Placa: ${v.placa}</small><br>
+          <small>Status: ${v.status}</small>
+        </div>
+      `;
+      container.appendChild(bloco);
     });
-    mostrarAviso("Comando de desbloqueio enviado!");
-    await listarComandos();
   } catch (e) {
-    mostrarAviso(e.message);
+    console.error(e);
+    container.innerHTML = "<p>Erro ao carregar veículos.</p>";
+    mostrarAviso("Falha ao conectar com a API.");
   }
 }
 
 /* ===== Histórico de comandos ===== */
 async function listarComandos() {
+  const lista = document.getElementById("lista-comandos");
+  if (!lista) return;
+  lista.innerHTML = "<li>Carregando...</li>";
+
   try {
     const comandos = await api("/comandos");
-    const lista = document.getElementById("lista-comandos");
-    if (!lista) return;
     lista.innerHTML = "";
+
     if (!comandos.length) {
-      lista.innerHTML = "<li>Nenhum comando ainda.</li>";
+      lista.innerHTML = "<li>Nenhum comando registrado.</li>";
       return;
     }
+
     comandos.forEach((c) => {
-      const item = document.createElement("li");
-      item.textContent = `#${c.id} • ${c.tipo} • ${c.status} • ${c.criado_em} (${c.modelo || ""} ${c.placa || ""})`;
-      lista.appendChild(item);
+      const li = document.createElement("li");
+      li.textContent = `#${c.id} • ${c.tipo} • ${c.status}`;
+      lista.appendChild(li);
     });
-  } catch (e) {
-    mostrarAviso("Erro ao carregar histórico");
+  } catch {
+    lista.innerHTML = "<li>Erro ao buscar comandos.</li>";
   }
 }
 
-/* ===== Lista de veículos ===== */
-async function listarVeiculos() {
-  try {
-    const veiculos = await api("/veiculos");
-    const container = document.getElementById("lista-veiculos");
-    if (!container) return;
-    container.innerHTML = "";
-    if (!veiculos.length) {
-      container.textContent = "Nenhum veículo cadastrado.";
-      return;
-    }
-    veiculos.forEach((v) => {
-      const caixa = document.createElement("div");
-      caixa.className = "veiculo";
-      caixa.innerHTML = `
-        <div>
-          <strong>${v.modelo || "Veículo"}</strong>
-          <br/><small>Placa: ${v.placa || "—"}</small>
-        </div>
-      `;
-
-      const botoes = document.createElement("div");
-      botoes.className = "grupo-botoes";
-
-      const botaoBloquear = document.createElement("button");
-      botaoBloquear.className = "perigo";
-      botaoBloquear.textContent = "Bloquear";
-      botaoBloquear.onclick = () => bloquearVeiculo(v.id);
-
-      const botaoDesbloquear = document.createElement("button");
-      botaoDesbloquear.className = "primario";
-      botaoDesbloquear.textContent = "Desbloquear";
-      botaoDesbloquear.onclick = () => desbloquearVeiculo(v.id);
-
-      botoes.appendChild(botaoBloquear);
-      botoes.appendChild(botaoDesbloquear);
-      caixa.appendChild(botoes);
-      container.appendChild(caixa);
-    });
-  } catch (e) {
-    mostrarAviso("Erro ao carregar veículos");
-  }
-}
-
-/* ===== Mapa (Leaflet) ===== */
+/* ===== Inicializar mapa ===== */
 let mapa;
-const marcadores = new Map();
-
-function iconePorStatus(statuso) {
-  return L.divIcon({
-    className: "pino-veiculo",
-    html:
-      '<div style="width:12px;height:12px;border-radius:50%;' +
-      "background:" +
-      (statuso === "em_movimento"
-        ? "#22c55e"
-        : statuso === "offline"
-        ? "#ef4444"
-        : "#f59e0b") +
-      ';border:2px solid white;box-shadow:0 0 0 2px rgba(0,0,0,.25)"></div>',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
-  });
-}
-
 function iniciarMapa() {
-  mapa = L.map("mapa-rastreamento", { zoomControl: true });
-
+  mapa = L.map("mapa-rastreamento").setView([-14.235, -51.9253], 4);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
+    maxZoom: 18,
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
   }).addTo(mapa);
-
-  mapa.setView([-14.2350, -51.9253], 4); // Brasil
-  setTimeout(() => mapa.invalidateSize(), 100);
 }
 
 /* ===== Inicialização ===== */
-document.addEventListener("DOMContentLoaded", async () => {
-  // 🔓 LOGIN DESATIVADO: acesso direto ao painel
-  // const usuario = await pegarSessao();
-  // if (!usuario) {
-  //   location.href = "login.html";
-  //   return;
-  // }
-
-  const nome =
-    sessionStorage.getItem("usuarioNome") || "usuário visitante";
-  document.getElementById("bem-vindo").textContent = `Olá, ${nome}!`;
-
-  // Botão de sair agora só limpa dados, sem redirecionar forçado
-  document.getElementById("botao-sair").addEventListener("click", () => {
-    sessionStorage.clear();
-    localStorage.removeItem("usuarioNome");
-    mostrarAviso("Sessão finalizada (modo visitante).");
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("botao-atualizar-comandos")
+    .addEventListener("click", listarComandos);
 
   iniciarMapa();
   listarVeiculos();
   listarComandos();
 
-  document
-    .getElementById("botao-atualizar-comandos")
-    .addEventListener("click", listarComandos);
+  document.getElementById("bem-vindo").textContent = "Olá, usuário visitante!";
 });
 
