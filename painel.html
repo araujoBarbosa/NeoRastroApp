@@ -20,159 +20,222 @@
     upgrade-insecure-requests;
   ">
 
-  <link rel="stylesheet" href="estilo.css" />
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+  <script src="https://unpkg.com/feather-icons@4.29.0/dist/feather.min.js"></script>
 
   <style>
-    body {
-      background:#0b1120; color:#e5e7eb; margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    /* ===== Variáveis ===== */
+    :root {
+      --neo-primary: #3b82f6;
+      --neo-primary-dark: #1d4ed8;
+      --neo-primary-light: #60a5fa;
+      --neo-secondary: #8b5cf6;
+      --neo-success: #10b981;
+      --neo-danger: #ef4444;
+      --neo-warning: #f59e0b;
+      --neo-info: #06b6d4;
+      --neo-bg-primary: #0f172a;
+      --neo-bg-secondary: #1e293b;
+      --neo-bg-card: #1e293b;
+      --neo-text-primary: #f8fafc;
+      --neo-text-secondary: #cbd5e1;
+      --neo-border: #475569;
+      --neo-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      --radius: 10px;
+      --transition: all .3s ease;
+    }
+
+    /* ===== Base ===== */
+    * { box-sizing: border-box; }
+    body.pagina--painel {
+      margin: 0; font-family: 'Inter', system-ui, sans-serif;
+      background: var(--neo-bg-primary); color: var(--neo-text-primary);
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--neo-border); border-radius: 4px;
     }
 
     /* ===== Cabeçalho ===== */
     header.painel-header {
       display:flex; justify-content:space-between; align-items:center;
-      padding:12px 20px; background:#111827; border-bottom:1px solid #1f2937;
+      padding:14px 22px;
+      background: linear-gradient(135deg,#1e293b,#334155);
+      border-bottom:1px solid var(--neo-border);
       position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--neo-shadow);
     }
-    header .marca { display:flex; align-items:center; gap:10px; }
-    header .marca h1 { font-size:1.2rem; font-weight:600; margin:0; }
-    header .acoes-header { display:flex; align-items:center; gap:10px; }
-    header button {
-      background:#1d4ed8; color:#fff; border:0;
-      padding:6px 12px; border-radius:8px; cursor:pointer;
-      transition: background 0.2s;
+    .painel-header__marca { display:flex; align-items:center; gap:10px; }
+    .painel-header__titulo {
+      font-size:1.25rem; font-weight:700;
+      background:linear-gradient(135deg,#fff,var(--neo-primary-light));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     }
-    header button:hover { background:#2563eb; }
+    .painel-header__acoes { display:flex; align-items:center; gap:10px; }
+    .painel-header__bem-vindo { color:var(--neo-text-secondary); font-weight:500; }
+
+    /* ===== Botões ===== */
+    .neo-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:6px; padding:10px 14px;
+      border:none; border-radius:var(--radius);
+      font-weight:600; cursor:pointer;
+      transition:var(--transition);
+    }
+    .neo-btn--primary {
+      background:linear-gradient(135deg,var(--neo-primary),var(--neo-primary-dark));
+      color:#fff;
+    }
+    .neo-btn--primary:hover { background:var(--neo-primary-light); transform:translateY(-2px); }
+    .neo-btn--secondary {
+      background:var(--neo-bg-secondary); color:#fff; border:1px solid var(--neo-border);
+    }
+    .neo-btn--danger {
+      background:linear-gradient(135deg,var(--neo-danger),#b91c1c); color:#fff;
+    }
+    .neo-btn--success {
+      background:linear-gradient(135deg,var(--neo-success),#059669); color:#fff;
+    }
+    .neo-btn--loading::after {
+      content:''; width:14px; height:14px; margin-left:6px;
+      border:2px solid transparent; border-top:2px solid #fff; border-radius:50%;
+      animation: spin 1s linear infinite;
+    }
 
     /* ===== Layout principal ===== */
-    main {
-      display:grid; grid-template-columns:320px 1fr; gap:16px;
-      padding:16px; height:calc(100vh - 64px); box-sizing:border-box;
+    main.painel-main {
+      display:grid; grid-template-columns:360px 1fr; gap:20px;
+      padding:20px; height:calc(100vh - 80px); box-sizing:border-box;
     }
-    aside.painel-lateral {
-      background:#111827; border-radius:12px; padding:16px;
-      overflow-y:auto; box-shadow:0 0 12px rgba(0,0,0,0.3);
+
+    /* ===== Painel lateral ===== */
+    .painel-lateral {
+      background:var(--neo-bg-card); border-radius:var(--radius);
+      padding:20px; overflow-y:auto; box-shadow:var(--neo-shadow);
+      border:1px solid var(--neo-border);
     }
-    aside h2, aside h3 { margin-top:0; }
+    .painel-lateral h2, .painel-lateral h3 {
+      margin-top:0; display:flex; align-items:center; gap:8px;
+    }
 
     /* ===== Cartões de veículo ===== */
-    .veiculo {
-      background:#1f2937; border-radius:10px; padding:10px; margin-bottom:10px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+    .neo-veiculo {
+      background:var(--neo-bg-secondary);
+      border:1px solid var(--neo-border); border-radius:var(--radius);
+      padding:16px; margin-bottom:14px;
+      transition:var(--transition);
+      animation: fadeIn .4s ease-out;
     }
-    .veiculo strong { font-size:1rem; display:block; color:#fff; }
-    .veiculo small { color:#9ca3af; }
-    .grupo-botoes {
-      display:flex; gap:8px; margin-top:8px;
+    .neo-veiculo:hover { transform:translateY(-2px); border-color:var(--neo-primary); }
+    .neo-veiculo__modelo { font-weight:700; color:#fff; margin-bottom:4px; }
+    .neo-veiculo__detalhe { color:var(--neo-text-secondary); font-size:.9rem; }
+    .neo-veiculo__acoes { display:flex; gap:8px; margin-top:10px; }
+
+    /* ===== Histórico ===== */
+    .neo-historico__lista {
+      list-style:none; padding:0; margin:0;
+      max-height:300px; overflow:auto;
+      border:1px solid var(--neo-border); border-radius:var(--radius);
+      background:rgba(15,23,42,.5);
     }
-    .botao {
-      flex:1; padding:10px; border-radius:8px; border:0; cursor:pointer;
-      font-weight:500; font-size:.9rem;
-      transition: transform .15s ease, background .2s ease;
+    .neo-historico__item {
+      padding:10px 14px; border-bottom:1px solid rgba(255,255,255,.05);
+      color:var(--neo-text-secondary); display:flex; align-items:center; gap:8px;
+      transition:var(--transition);
     }
-    .botao:active { transform: scale(0.96); }
-    .botao-bloquear { background:#dc2626; color:#fff; }
-    .botao-bloquear:hover { background:#b91c1c; }
-    .botao-desbloquear { background:#16a34a; color:#fff; }
-    .botao-desbloquear:hover { background:#15803d; }
+    .neo-historico__item:hover { background:rgba(59,130,246,.1); color:#fff; }
 
     /* ===== Mapa ===== */
     #mapa-rastreamento {
-      height:100%; width:100%; border-radius:12px;
-      box-shadow:0 0 12px rgba(0,0,0,0.3);
+      height:100%; width:100%;
+      border-radius:var(--radius);
+      box-shadow:var(--neo-shadow);
     }
 
-    /* ===== Histórico ===== */
-    #lista-comandos {
-      list-style:none; padding:0; font-size:.9rem;
-      max-height:200px; overflow:auto; margin-bottom:10px;
-    }
-    #lista-comandos li {
-      padding:6px 0; border-bottom:1px solid #1f2937;
-      color:#cbd5e1;
-    }
-
-    /* ===== Mensagem de aviso ===== */
+    /* ===== Toast ===== */
     #mensagem-aviso {
       position:fixed; bottom:20px; right:20px;
-      background:#1d4ed8; color:#fff; padding:10px 16px;
-      border-radius:10px; display:none; box-shadow:0 2px 10px rgba(0,0,0,0.3);
-      font-size:.95rem;
+      padding:12px 18px; border-radius:var(--radius);
+      font-weight:600; color:#fff;
+      display:none; z-index:2000;
+      box-shadow:var(--neo-shadow);
+      -webkit-backdrop-filter:blur(10px);
+      backdrop-filter:blur(10px);
+      animation: slideIn .3s ease-out;
+    }
+    .neo-toast--info { background:linear-gradient(135deg,#3b82f6,#1e40af); }
+    .neo-toast--success { background:linear-gradient(135deg,#10b981,#059669); }
+    .neo-toast--error { background:linear-gradient(135deg,#ef4444,#b91c1c); }
+
+    /* ===== Responsividade ===== */
+    @media (max-width:1024px) {
+      main.painel-main {
+        grid-template-columns:1fr; grid-template-rows:60vh auto;
+        height:auto; padding:16px;
+      }
+      .painel-lateral { max-height:none; }
+    }
+    @media (max-width:768px) {
+      header.painel-header { flex-direction:column; align-items:flex-start; gap:10px; }
+      .painel-main { grid-template-rows:50vh auto; gap:14px; padding:12px; }
+      .neo-veiculo__acoes { flex-direction:column; }
+      .neo-btn { width:100%; }
+      #mensagem-aviso { left:10px; right:10px; bottom:16px; }
     }
 
-    /* ===== Responsividade (Celular / Tablet) ===== */
-    @media (max-width:900px) {
-      main {
-        grid-template-columns:1fr;
-        grid-template-rows:auto 1fr;
-        padding:10px;
-        height:auto;
-      }
-      #mapa-rastreamento {
-        height:60vh;
-        margin-bottom:12px;
-      }
-      aside.painel-lateral {
-        height:auto;
-        padding:14px;
-      }
-      .veiculo {
-        padding:12px;
-      }
-      .grupo-botoes {
-        flex-direction:column;
-      }
-      .botao {
-        width:100%;
-        font-size:1rem;
-        padding:12px;
-      }
-      header.painel-header {
-        flex-direction:column;
-        align-items:flex-start;
-        gap:6px;
-      }
-      header .acoes-header {
-        width:100%;
-        justify-content:space-between;
-      }
-    }
+    /* ===== Animações ===== */
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
   </style>
 </head>
 
 <body class="pagina--painel">
   <header class="painel-header">
-    <div class="marca">
-      <img src="favicon.svg" alt="Logo NeoRastro" width="28" height="28" />
-      <h1>NeoRastro — Painel</h1>
+    <div class="painel-header__marca">
+      <img src="favicon.svg" alt="Logo NeoRastro" width="32" height="32" />
+      <h1 class="painel-header__titulo">NeoRastro — Painel</h1>
     </div>
-    <div class="acoes-header">
-      <span id="bem-vindo">Olá!</span>
-      <button id="botao-sair" type="button">Sair</button>
+    <div class="painel-header__acoes">
+      <span id="bem-vindo" class="painel-header__bem-vindo">Olá!</span>
+      <button id="botao-sair" type="button" class="neo-btn neo-btn--primary">
+        <i data-feather="log-out"></i> Sair
+      </button>
     </div>
   </header>
 
-  <main>
+  <main class="painel-main" role="main">
     <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
 
-    <aside class="painel-lateral">
-      <h2>Meus veículos</h2>
+    <aside class="painel-lateral" aria-label="Painel de veículos e comandos">
+      <h2><i data-feather="truck"></i> Meus veículos</h2>
       <div id="lista-veiculos"></div>
 
-      <h3>Histórico de comandos</h3>
-      <ul id="lista-comandos"></ul>
-      <button id="botao-atualizar-comandos" class="botao" style="background:#374151;color:#fff;">Atualizar histórico</button>
+      <div class="neo-historico">
+        <h3><i data-feather="clock"></i> Histórico de comandos</h3>
+        <ul id="lista-comandos" class="neo-historico__lista"></ul>
+        <button id="botao-atualizar-comandos" class="neo-btn neo-btn--secondary" style="width:100%;">
+          <i data-feather="refresh-cw"></i> Atualizar histórico
+        </button>
+      </div>
     </aside>
   </main>
 
-  <div id="mensagem-aviso" role="status" aria-live="polite"></div>
+  <div id="mensagem-aviso" class="neo-toast neo-toast--info" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script src="painel.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof feather !== "undefined") feather.replace();
+    });
+  </script>
 </body>
 </html>
+
 
 
 
