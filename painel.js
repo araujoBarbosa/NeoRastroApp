@@ -187,16 +187,23 @@ function iniciarMapa() {
 
 /* ===== Inicialização ===== */
 document.addEventListener("DOMContentLoaded", async () => {
-  const usuario = await pegarSessao();
-  if (!usuario) {
-    location.href = "login.html";
-    return;
-  }
+  // 🔓 LOGIN DESATIVADO: acesso direto ao painel
+  // const usuario = await pegarSessao();
+  // if (!usuario) {
+  //   location.href = "login.html";
+  //   return;
+  // }
 
   const nome =
-    usuario.nome || sessionStorage.getItem("usuarioNome") || "usuário";
+    sessionStorage.getItem("usuarioNome") || "usuário visitante";
   document.getElementById("bem-vindo").textContent = `Olá, ${nome}!`;
-  document.getElementById("botao-sair").addEventListener("click", sairSistema);
+
+  // Botão de sair agora só limpa dados, sem redirecionar forçado
+  document.getElementById("botao-sair").addEventListener("click", () => {
+    sessionStorage.clear();
+    localStorage.removeItem("usuarioNome");
+    mostrarAviso("Sessão finalizada (modo visitante).");
+  });
 
   iniciarMapa();
   listarVeiculos();
