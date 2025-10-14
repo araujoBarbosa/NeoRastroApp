@@ -64,17 +64,24 @@ function alternarVisibilidade(idDoCampo, botao) {
       botaoCadastro.textContent = "Criando conta…";
 
       try {
-        const resposta = await fetch("/api/cadastro", {
+        // ✅ URL correta do seu backend Flask
+        const resposta = await fetch("https://api.neorastro.cloud/cadastro", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nome, email, senha }),
         });
 
-        const dados = await resposta.json();
+        const dados = await resposta.json().catch(() => ({}));
 
         if (resposta.ok) {
-          mostrarMensagem(mensagem, "✅ Cadastro realizado com sucesso! Redirecionando…", false);
-          setTimeout(() => { window.location.href = "login.html"; }, 1500);
+          mostrarMensagem(
+            mensagem,
+            "✅ Cadastro realizado com sucesso! Redirecionando…",
+            false
+          );
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
         } else {
           mostrarMensagem(mensagem, dados.erro || "❌ Erro ao cadastrar.", true);
         }
@@ -94,3 +101,4 @@ function alternarVisibilidade(idDoCampo, botao) {
     ligarFormulario();
   }
 })();
+
