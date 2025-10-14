@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#1d4ed8" />
   <title>NeoRastro — Painel</title>
 
-  <!-- ✅ Política de segurança corrigida -->
+  <!-- ✅ Política de segurança -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data: blob:;
     img-src 'self' data: https://*;
@@ -22,35 +22,49 @@
 
   <link rel="stylesheet" href="estilo.css" />
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin="anonymous"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
 
   <style>
-    main { display:grid; grid-template-columns: 320px 1fr; gap:16px; }
-    #mapa-rastreamento { height: calc(100vh - 90px); border-radius:12px; }
-    .painel-lateral { background: var(--cartao,#111827); padding:12px; border-radius:12px; color:#e5e7eb; overflow:auto }
-    .veiculo { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px; background:#1f2937; border-radius:8px }
-    .veiculo strong { display:block }
-    .veiculo small { opacity:.8 }
-    .grupo-botoes { display:flex; gap:6px; }
-    button { border:0; padding:6px 10px; border-radius:8px; cursor:pointer; }
-    .primario { background:#1d4ed8; color:#fff }
-    .perigo { background:#b91c1c; color:#fff }
-    .suave { background:#374151; color:#e5e7eb }
-    #lista-comandos { margin-top:14px; font-size:.9rem; max-height:180px; overflow:auto; }
-    #lista-comandos li { margin:4px 0; }
+    body { background:#0b1120; color:#e5e7eb; margin:0; font-family:system-ui,sans-serif; }
+    header.painel-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#111827; border-bottom:1px solid #1f2937; position:sticky; top:0; z-index:10; }
+    header .marca { display:flex; align-items:center; gap:10px; }
+    header .marca h1 { font-size:1.2rem; font-weight:600; margin:0; }
+    header .acoes-header { display:flex; align-items:center; gap:10px; }
+    header button { background:#1d4ed8; color:#fff; border:0; padding:6px 12px; border-radius:8px; cursor:pointer; }
+    header button:hover { background:#2563eb; }
+
+    main { display:grid; grid-template-columns:320px 1fr; gap:16px; padding:16px; height:calc(100vh - 64px); box-sizing:border-box; }
+    aside.painel-lateral { background:#111827; border-radius:12px; padding:16px; overflow-y:auto; box-shadow:0 0 12px rgba(0,0,0,0.3); }
+    aside h2, aside h3 { margin-top:0; }
+
+    .veiculo { background:#1f2937; border-radius:10px; padding:10px; margin-bottom:10px; box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+    .veiculo strong { font-size:1rem; display:block; color:#fff; }
+    .veiculo small { color:#9ca3af; }
+    .grupo-botoes { display:flex; gap:6px; margin-top:8px; }
+    .botao { flex:1; padding:6px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:500; }
+    .botao-bloquear { background:#dc2626; color:#fff; }
+    .botao-bloquear:hover { background:#b91c1c; }
+    .botao-desbloquear { background:#16a34a; color:#fff; }
+    .botao-desbloquear:hover { background:#15803d; }
+
+    #mapa-rastreamento { height:100%; width:100%; border-radius:12px; }
+    #lista-comandos { list-style:none; padding:0; font-size:.9rem; max-height:200px; overflow:auto; }
+    #lista-comandos li { padding:4px 0; border-bottom:1px solid #1f2937; }
+
+    #mensagem-aviso { position:fixed; bottom:20px; right:20px; background:#1d4ed8; color:#fff; padding:10px 16px; border-radius:10px; display:none; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
+
+    @media (max-width:800px) {
+      main { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+      aside.painel-lateral { order:2; height:auto; }
+      #mapa-rastreamento { height:60vh; }
+    }
   </style>
 </head>
 
 <body class="pagina--painel">
-  <header class="painel-header container">
+  <header class="painel-header">
     <div class="marca">
-      <img src="favicon.svg" alt="Logo NeoRastro" width="24" height="24" />
+      <img src="favicon.svg" alt="Logo NeoRastro" width="28" height="28" />
       <h1>NeoRastro — Painel</h1>
     </div>
     <div class="acoes-header">
@@ -59,14 +73,14 @@
     </div>
   </header>
 
-  <main class="container" style="padding:0">
+  <main>
     <aside class="painel-lateral">
       <h2>Meus veículos</h2>
       <div id="lista-veiculos"></div>
 
-      <h3 style="margin-top:16px">Histórico de comandos</h3>
+      <h3>Histórico de comandos</h3>
       <ul id="lista-comandos"></ul>
-      <button id="botao-atualizar-comandos" class="suave">Atualizar histórico</button>
+      <button id="botao-atualizar-comandos" class="botao" style="background:#374151;color:#fff;">Atualizar histórico</button>
     </aside>
 
     <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
@@ -74,16 +88,11 @@
 
   <div id="mensagem-aviso" class="aviso" role="status" aria-live="polite"></div>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin="anonymous"
-  ></script>
-
-  <!-- Script local -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script src="painel.js"></script>
 </body>
 </html>
+
 
 
 
