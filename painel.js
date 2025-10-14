@@ -4,11 +4,15 @@
 const API_BASE = "https://api.neorastro.cloud";
 
 /* ===== Função auxiliar de avisos ===== */
-function mostrarAviso(mensagem, tempo = 3000) {
+function mostrarAviso(mensagem, tempo = 3000, tipo = "info") {
   const msg = document.getElementById("mensagem-aviso");
   if (!msg) return;
+
   msg.textContent = mensagem;
   msg.style.display = "block";
+  msg.style.background =
+    tipo === "erro" ? "#b91c1c" : tipo === "sucesso" ? "#16a34a" : "#1d4ed8";
+
   clearTimeout(window.__msg);
   window.__msg = setTimeout(() => (msg.style.display = "none"), tempo);
 }
@@ -26,6 +30,24 @@ async function api(caminho, opcoes = {}) {
 
   if (!resposta.ok) throw new Error("Erro ao acessar a API");
   return await resposta.json();
+}
+
+/* ===== Enviar comando ===== */
+async function enviarComando(id_veiculo, tipo) {
+  try {
+    mostrarAviso(`Enviando comando "${tipo}"...`);
+
+    const resposta = await api("/comandos", {
+      method: "POST",
+      body: JSON.stringify({ tipo, id_veiculo }),
+    });
+
+    mostrarAviso(resposta.mensagem || "Comando enviado!", 3000, "sucesso");
+    listarComandos(); // atualiza histórico
+  } catch (e) {
+    console.error(e);
+    mostrarAviso("Erro ao enviar comando.", 4000, "erro");
+  }
 }
 
 /* ===== Listar veículos ===== */
@@ -50,17 +72,30 @@ async function listarVeiculos() {
       bloco.className = "veiculo";
       bloco.innerHTML = `
         <div>
-          <strong>${v.modelo}</strong><br>
-          <small>Placa: ${v.placa}</small><br>
-          <small>Status: ${v.status}</small>
+          <strong>${v.modelo || "Sem modelo"}</strong>
+          <small>Placa: ${v.placa || "—"}</small><br>
+          <small>Status: ${v.status || "desconhecido"}</small>
+        </div>
+        <div class="grupo-botoes">
+          <button class="botao botao-bloquear" data-id="${v.id}" data-tipo="bloquear">Bloquear</button>
+          <button class="botao botao-desbloquear" data-id="${v.id}" data-tipo="desbloquear">Desbloquear</button>
         </div>
       `;
       container.appendChild(bloco);
     });
+
+    // Liga os botões
+    container.querySelectorAll("button[data-tipo]").forEach((botao) => {
+      botao.addEventListener("click", async (ev) => {
+        const tipo = ev.target.dataset.tipo;
+        const id = ev.target.dataset.id;
+        await enviarComando(id, tipo);
+      });
+    });
   } catch (e) {
     console.error(e);
     container.innerHTML = "<p>Erro ao carregar veículos.</p>";
-    mostrarAviso("Falha ao conectar com a API.");
+    mostrarAviso("Falha ao conectar com a API.", 4000, "erro");
   }
 }
 
