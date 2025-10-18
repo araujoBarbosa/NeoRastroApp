@@ -150,7 +150,7 @@
         botao.textContent = 'Entrando…';
 
         try {
-          const resposta = await fetch('https://api.neorastro.cloud/login', {
+          const resposta = await fetch('https://neorastro.cloud/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
