@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro — Cadastro</title>
 
-  <!-- ✅ Permitir comunicação com a API -->
+  <!-- ✅ Permitir comunicação com o backend HTTPS -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -80,7 +80,6 @@
         <h2 id="titulo-cadastro">Crie sua conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Removido action local -->
         <form id="formulario-cadastro" autocomplete="on" novalidate>
           <label class="so-leitor" for="campo-nome">Nome completo</label>
           <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required minlength="3" />
@@ -187,6 +186,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
