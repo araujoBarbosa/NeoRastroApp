@@ -7,6 +7,20 @@
   <meta name="theme-color" content="#1d4ed8" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
   <script src="https://unpkg.com/feather-icons@4.29.0/dist/feather.min.js"></script>
+
+  <!-- ✅ Permitir comunicação com a API -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' data:;
+    img-src 'self' data:;
+    style-src 'self' 'unsafe-inline';
+    script-src 'self' 'unsafe-inline';
+    connect-src 'self' https://neorastro.cloud;
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  ">
+
   <style>
     body {
       font-family: "Inter", system-ui, sans-serif;
@@ -113,7 +127,7 @@
 <body>
   <header>
     <h1><i data-feather="user-check"></i> Painel Administrativo — NeoRastro</h1>
-    <button onclick="window.location.href='/login'" style="background:#334155;color:#fff;padding:8px 14px;border-radius:8px;">Sair</button>
+    <button onclick="window.location.href='login.html'" style="background:#334155;color:#fff;padding:8px 14px;border-radius:8px;">Sair</button>
   </header>
 
   <main>
@@ -134,11 +148,78 @@
     </table>
   </main>
 
-  <script src="/static/admin.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       feather.replace();
+      carregarUsuarios();
     });
+
+    async function carregarUsuarios() {
+      const corpo = document.getElementById('corpo-tabela');
+      corpo.innerHTML = '<tr><td colspan="5" class="mensagem">⏳ Carregando usuários...</td></tr>';
+
+      try {
+        const resposta = await fetch('https://neorastro.cloud/admin/usuarios');
+        const usuarios = await resposta.json();
+
+        if (!resposta.ok) throw new Error(usuarios.mensagem || 'Erro ao carregar usuários');
+
+        if (usuarios.length === 0) {
+          corpo.innerHTML = '<tr><td colspan="5" class="mensagem">Nenhum usuário cadastrado.</td></tr>';
+          return;
+        }
+
+        corpo.innerHTML = '';
+        usuarios.forEach(u => {
+          const linha = document.createElement('tr');
+          linha.innerHTML = `
+            <td>${u.id}</td>
+            <td>${u.nome}</td>
+            <td>${u.email}</td>
+            <td class="${u.aprovado ? 'status-aprovado' : 'status-pendente'}">
+              ${u.aprovado ? 'Aprovado' : 'Pendente'}
+            </td>
+            <td>
+              ${u.aprovado ? `
+                <button class="btn-remover" onclick="removerUsuario(${u.id})">Remover</button>
+              ` : `
+                <button class="btn-aprovar" onclick="aprovarUsuario(${u.id})">Aprovar</button>
+                <button class="btn-remover" onclick="removerUsuario(${u.id})">Remover</button>
+              `}
+            </td>
+          `;
+          corpo.appendChild(linha);
+        });
+
+      } catch (erro) {
+        corpo.innerHTML = `<tr><td colspan="5" class="mensagem">⚠️ ${erro.message}</td></tr>`;
+      }
+    }
+
+    async function aprovarUsuario(id) {
+      if (!confirm('Deseja realmente aprovar este usuário?')) return;
+      try {
+        const resposta = await fetch(`https://neorastro.cloud/admin/aprovar/${id}`, { method: 'POST' });
+        if (!resposta.ok) throw new Error('Erro ao aprovar usuário');
+        alert('✅ Usuário aprovado com sucesso!');
+        carregarUsuarios();
+      } catch (erro) {
+        alert('❌ ' + erro.message);
+      }
+    }
+
+    async function removerUsuario(id) {
+      if (!confirm('Tem certeza que deseja remover este usuário?')) return;
+      try {
+        const resposta = await fetch(`https://neorastro.cloud/admin/remover/${id}`, { method: 'DELETE' });
+        if (!resposta.ok) throw new Error('Erro ao remover usuário');
+        alert('🗑️ Usuário removido com sucesso!');
+        carregarUsuarios();
+      } catch (erro) {
+        alert('❌ ' + erro.message);
+      }
+    }
   </script>
 </body>
 </html>
+
