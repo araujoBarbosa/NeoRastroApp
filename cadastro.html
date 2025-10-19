@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro — Cadastro</title>
 
-  <!-- ✅ Permitir comunicação com o backend HTTPS -->
+  <!-- ✅ Segurança e HTTPS -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -19,56 +19,12 @@
     frame-ancestors 'none';
     upgrade-insecure-requests;
   ">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
-
-  <style>
-    :root {
-      --cor-fundo:#0b1220; --cor-fundo-2:#0f172a; --cor-cartao:rgba(255,255,255,0.08);
-      --cor-texto:#e5e7eb; --cor-suave:#94a3b8; --cor-marca:#3b82f6; --cor-marca-escura:#2563eb;
-      --cor-ok:#16a34a; --cor-erro:#ef4444;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial,"Apple Color Emoji","Segoe UI Emoji";
-      color:var(--cor-texto);
-      background:url("fundo.jpg") center/cover no-repeat fixed, linear-gradient(180deg,var(--cor-fundo),var(--cor-fundo-2));
-    }
-    a{color:#93c5fd}
-    .sobreposicao{min-height:100dvh;display:grid;place-items:center;padding:24px;backdrop-filter:saturate(1.2) blur(1.5px);background:linear-gradient(0deg,rgba(0,0,0,.45),rgba(0,0,0,.45))}
-    header{text-align:center;margin-bottom:8px}
-    header h1{font-size:clamp(1.8rem,3.5vw,2.5rem);margin:0;color:var(--cor-marca)}
-    header p{color:var(--cor-suave);margin:.25rem 0 0}
-    main{width:100%;max-width:480px}
-    .cartao-escuro{background:var(--cor-cartao);border:1px solid rgba(148,163,184,.15);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(2,6,23,.35)}
-    .cartao-escuro h2{margin:0 0 12px 0;font-size:1.25rem}
-    form{display:grid;gap:12px}
-    label{font-size:.9rem;color:var(--cor-suave)}
-    .so-leitor{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
-    input[type="text"],input[type="email"],input[type="tel"],input[type="password"]{
-      width:100%;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.6);
-      color:var(--cor-texto);border-radius:12px;padding:12px 14px;outline:none
-    }
-    input[aria-invalid="true"]{border-color:#ef4444}
-    .campo{position:relative}
-    .botao-alternar-senha{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#93c5fd;cursor:pointer;font-size:1rem}
-    .linha{display:grid;gap:12px;grid-template-columns:1fr 1fr}
-    @media (max-width:520px){.linha{grid-template-columns:1fr}}
-    .mensagem{display:block;padding:10px;border-radius:10px;font-size:.95rem}
-    .mensagem:empty{display:none}
-    .mensagem.erro{background:#fee2e2;color:#7f1d1d}
-    .mensagem.sucesso{background:#dcfce7;color:#14532d}
-    .forca{display:flex;gap:6px;align-items:center}
-    .forca progress{width:100%;height:6px}
-    .consentimento{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;color:var(--cor-suave)}
-    button[type="submit"]{padding:12px 16px;border-radius:12px;border:0;background:linear-gradient(180deg,var(--cor-marca),var(--cor-marca-escura));color:white;font-weight:600;cursor:pointer}
-    button[disabled]{opacity:.6;cursor:not-allowed}
-    .rodape{text-align:center;margin-top:10px;color:var(--cor-suave)}
-    .erro-campo{color:#fecaca;font-size:.85rem;margin-top:4px}
-  </style>
+  <!-- ✅ Importar estilo global -->
+  <link rel="stylesheet" href="estilo.css" />
 </head>
-<body>
+<body class="pagina--autenticacao">
   <div class="sobreposicao">
     <main>
       <header>
@@ -76,83 +32,69 @@
         <p>Rastreie seus veículos com segurança e tecnologia.</p>
       </header>
 
-      <section class="cartao-escuro" aria-labelledby="titulo-cadastro">
-        <h2 id="titulo-cadastro">Crie sua conta</h2>
+      <section class="secao-formulario cartao-escuro" aria-labelledby="titulo-cadastro">
+        <h2 id="titulo-cadastro">Crie sua Conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
         <form id="formulario-cadastro" autocomplete="on" novalidate>
-          <label class="so-leitor" for="campo-nome">Nome completo</label>
           <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required minlength="3" />
-
-          <label class="so-leitor" for="campo-email">E-mail</label>
           <input id="campo-email" name="email" type="email" placeholder="E-mail" required />
 
           <div class="linha">
-            <div>
-              <input id="campo-telefone" name="telefone" type="tel" placeholder="Telefone (com DDD)" required
-                     pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$" />
-            </div>
-            <div>
-              <input id="campo-empresa" name="empresa" type="text" placeholder="Empresa (opcional)" />
-            </div>
+            <input id="campo-telefone" name="telefone" type="tel" placeholder="Telefone (com DDD)" required />
+            <input id="campo-empresa" name="empresa" type="text" placeholder="Empresa (opcional)" />
           </div>
 
-          <div class="campo">
+          <div class="campo-senha">
             <input id="campo-senha" name="senha" type="password" placeholder="Crie uma senha" required minlength="8" />
             <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-senha">👁️</button>
           </div>
 
-          <div class="campo">
+          <div class="campo-senha">
             <input id="campo-confirmar" name="confirmar" type="password" placeholder="Confirme a senha" required minlength="8" />
             <button type="button" class="botao-alternar-senha" aria-label="Mostrar senha" aria-controls="campo-confirmar">👁️</button>
           </div>
 
-          <label class="consentimento">
+          <label class="lembrar-dispositivo">
             <input id="campo-aceite" name="aceite" type="checkbox" required />
             <span>Concordo com os <a href="#">Termos</a> e a <a href="#">Política de Privacidade</a>.</span>
           </label>
 
           <button id="botao-cadastro" type="submit" disabled>Criar conta</button>
         </form>
-        <p class="rodape">Já tem conta? <a href="login.html">Entrar</a></p>
+
+        <div class="links">
+          <a href="login.html">Já tem conta? Entrar</a>
+        </div>
       </section>
     </main>
   </div>
 
   <script>
-    // Mostrar / ocultar senha
+    // Alternar visibilidade da senha
     document.querySelectorAll(".botao-alternar-senha").forEach(botao => {
       botao.addEventListener("click", () => {
-        const id = botao.getAttribute("aria-controls");
-        const campo = document.getElementById(id);
+        const campo = document.getElementById(botao.getAttribute("aria-controls"));
         if (!campo) return;
-        campo.type = campo.type === "password" ? "text" : "password";
-        botao.textContent = campo.type === "password" ? "👁️" : "🙈";
+        const visivel = campo.type === "text";
+        campo.type = visivel ? "password" : "text";
+        botao.textContent = visivel ? "👁️" : "🙈";
       });
     });
 
-    // Função de cadastro
+    // Envio do formulário
     const form = document.getElementById("formulario-cadastro");
     const msg = document.getElementById("mensagem-cadastro");
     const botao = document.getElementById("botao-cadastro");
 
-    form.addEventListener("input", () => {
-      botao.disabled = !form.checkValidity();
-    });
+    form.addEventListener("input", () => botao.disabled = !form.checkValidity());
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       msg.textContent = "⏳ Enviando dados...";
       msg.className = "mensagem";
 
-      const dados = {
-        nome: form.nome.value.trim(),
-        email: form.email.value.trim(),
-        telefone: form.telefone.value.trim(),
-        empresa: form.empresa.value.trim(),
-        senha: form.senha.value.trim(),
-        confirmar: form.confirmar.value.trim(),
-      };
+      const dados = Object.fromEntries(new FormData(form).entries());
 
       if (dados.senha !== dados.confirmar) {
         msg.textContent = "❌ As senhas não coincidem.";
@@ -168,7 +110,6 @@
         });
 
         const resultado = await resposta.json();
-
         if (resposta.ok) {
           msg.textContent = "✅ Cadastro realizado com sucesso! Redirecionando...";
           msg.className = "mensagem sucesso";
@@ -177,8 +118,7 @@
           msg.textContent = "❌ " + (resultado.mensagem || "Erro ao cadastrar.");
           msg.className = "mensagem erro";
         }
-      } catch (erro) {
-        console.error(erro);
+      } catch {
         msg.textContent = "⚠️ Erro ao conectar com o servidor.";
         msg.className = "mensagem erro";
       }
@@ -186,6 +126,7 @@
   </script>
 </body>
 </html>
+
 
 
 
