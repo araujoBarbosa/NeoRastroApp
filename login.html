@@ -4,69 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro — Login</title>
+
+  <!-- ✅ Corrigido: caminho correto para GitHub Pages -->
   <link rel="stylesheet" href="estilo.css" />
-  <style>
-    .so-leitor { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
-    .links { display:flex; justify-content:space-between; align-items:center; font-size:.95rem; }
-    .links a { color:#93c5fd; text-decoration:none }
-    .links a:hover { text-decoration:underline }
-    .mensagem { display:block; padding:10px; border-radius:10px; font-size:.95rem }
-    .mensagem:empty { display:none }
-    .mensagem.erro { background:#fee2e2; color:#7f1d1d }
-    .mensagem.sucesso { background:#dcfce7; color:#14532d }
-    .campo-senha { position:relative }
-    .botao-alternar-senha {
-      position:absolute; right:10px; top:50%; transform:translateY(-50%);
-      background:none; border:0; color:#93c5fd; cursor:pointer; font-size:1.05rem;
-    }
 
-    /* Nome da empresa */
-    .nome-empresa {
-      font-size: 2rem;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 10px;
-      color: #1d4ed8;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-    }
-
-    /* Subtítulo */
-    .titulo-login {
-      font-size: 1.3rem;
-      text-align: center;
-      margin-bottom: 20px;
-      color: #22c55e;
-      font-weight: 600;
-    }
-
-    /* Linha com checkbox e botão */
-    .linha-login {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1rem;
-      gap: 1rem;
-    }
-    .lembrar-dispositivo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: .9rem;
-      color: #e5e7eb;
-    }
-    .lembrar-dispositivo input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: #2563eb;
-    }
-    #botao-entrar {
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-  </style>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' data:;
+    img-src 'self' data:;
+    style-src 'self' 'unsafe-inline';
+    script-src 'self' 'unsafe-inline';
+    connect-src 'self' https://api.neorastro.cloud;
+    base-uri 'self';
+    form-action 'self';
+  ">
 </head>
 <body class="pagina--autenticacao">
 
@@ -103,7 +55,7 @@
 
         <div class="links" style="margin-top:.75rem">
           <a href="recuperar.html" rel="nofollow">Esqueci minha senha</a>
-          <a href="/cadastro">Criar conta</a>
+          <a href="cadastro.html">Criar conta</a>
         </div>
       </section>
     </main>
@@ -150,8 +102,8 @@
         botao.textContent = 'Entrando…';
 
         try {
-          // ✅ Envia o login para o endpoint correto da API
-          const resposta = await fetch('https://neorastro.cloud/api/login', {
+          // ✅ Corrigido: backend via subdomínio API
+          const resposta = await fetch('https://api.neorastro.cloud/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -166,7 +118,7 @@
 
           mensagem.textContent = '✅ Login realizado! Redirecionando…';
           mensagem.classList.add('sucesso');
-          setTimeout(()=> window.location.href = '/painel', 600);
+          setTimeout(()=> window.location.href = 'painel.html', 600);
 
         } catch (erro) {
           mensagem.textContent = '❌ ' + (erro.message || 'Erro ao conectar.');
