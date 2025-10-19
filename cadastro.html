@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro — Cadastro</title>
 
-  <!-- ✅ Segurança e comunicação com backend na VPS -->
+  <!-- ✅ Segurança e comunicação com backend HTTPS -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -15,13 +15,12 @@
     script-src 'self' 'unsafe-inline';
     connect-src 'self' https://api.neorastro.cloud;
     base-uri 'self';
-    form-action 'self';
+    form-action https://api.neorastro.cloud;
     frame-ancestors 'none';
     upgrade-insecure-requests;
   ">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-  <!-- Imagem principal -->
   <link rel="preload" as="image" href="imagem-principal.jpg" />
 
   <style>
@@ -82,7 +81,7 @@
         <h2 id="titulo-cadastro">Crie sua conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Ação do formulário apontando para a VPS -->
+        <!-- ✅ Formulário enviando para API segura -->
         <form id="formulario-cadastro" method="post" action="https://api.neorastro.cloud/api/cadastro" autocomplete="on" novalidate>
           
           <label class="so-leitor" for="campo-nome">Nome completo</label>
@@ -141,7 +140,7 @@
     </div>
   </noscript>
 
-  <!-- ✅ Caminho local para funcionar no GitHub Pages -->
+  <!-- ✅ JS separado -->
   <script defer src="cadastro.js"></script>
 </body>
 </html>
