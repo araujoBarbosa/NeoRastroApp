@@ -64,14 +64,13 @@ function alternarVisibilidade(idDoCampo, botao) {
       botaoCadastro.textContent = "Criando conta…";
 
       try {
-        // ✅ Comunicação com backend Flask
-        const resposta = await fetch("https://api.neorastro.cloud/cadastro", {
+        // ✅ Comunicação com backend Flask na VPS
+        const resposta = await fetch("https://api.neorastro.cloud/api/cadastro", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           mode: "cors",
-          credentials: "omit",
           body: JSON.stringify({ nome, email, senha }),
         });
 
@@ -89,13 +88,13 @@ function alternarVisibilidade(idDoCampo, botao) {
         } else {
           mostrarMensagem(
             mensagem,
-            dados.erro || "❌ Erro ao cadastrar.",
+            dados.erro || "❌ Erro ao cadastrar. Tente novamente.",
             true
           );
         }
       } catch (erro) {
         console.error("Erro:", erro);
-        mostrarMensagem(mensagem, "❌ Erro ao conectar com o servidor.", true);
+        mostrarMensagem(mensagem, "❌ Falha na conexão com o servidor.", true);
       } finally {
         botaoCadastro.disabled = false;
         botaoCadastro.textContent = "Criar conta";
@@ -110,5 +109,6 @@ function alternarVisibilidade(idDoCampo, botao) {
     ligarFormulario();
   }
 })();
+
 
 
