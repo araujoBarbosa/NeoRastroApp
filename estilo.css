@@ -201,9 +201,7 @@ button.suave { background:#374151; color:#e5e7eb; }
 }
 
 /* ========== Página: Meus Veículos ========== */
-#lista-veiculos {
-  margin-top: 1rem;
-}
+#lista-veiculos { margin-top: 1rem; }
 .veiculo-item {
   border: 1px solid var(--cor-borda);
   padding: 12px;
@@ -233,5 +231,6 @@ footer {
   color: var(--cor-suave);
   font-size: .85rem;
 }
+
 
 
