@@ -103,7 +103,7 @@
 
         <div class="links" style="margin-top:.75rem">
           <a href="recuperar.html" rel="nofollow">Esqueci minha senha</a>
-          <a href="cadastro.html">Criar conta</a>
+          <a href="/cadastro">Criar conta</a>
         </div>
       </section>
     </main>
@@ -150,7 +150,8 @@
         botao.textContent = 'Entrando…';
 
         try {
-          const resposta = await fetch('https://neorastro.cloud/login', {
+          // ✅ Envia o login para o endpoint correto da API
+          const resposta = await fetch('https://neorastro.cloud/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -161,11 +162,11 @@
           });
 
           const dados = await resposta.json();
-          if (!resposta.ok) throw new Error(dados.mensagem || 'Credenciais inválidas.');
+          if (!resposta.ok) throw new Error(dados.erro || 'Credenciais inválidas.');
 
           mensagem.textContent = '✅ Login realizado! Redirecionando…';
           mensagem.classList.add('sucesso');
-          setTimeout(()=> window.location.href = 'painel.html', 600);
+          setTimeout(()=> window.location.href = '/painel', 600);
 
         } catch (erro) {
           mensagem.textContent = '❌ ' + (erro.message || 'Erro ao conectar.');
@@ -183,6 +184,7 @@
   </script>
 </body>
 </html>
+
 
 
 
