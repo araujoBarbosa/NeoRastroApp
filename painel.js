@@ -3,6 +3,24 @@
 /* ===== Configuração da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
+/* ===== Controle de sessão ===== */
+function pegarUsuario() {
+  try {
+    return JSON.parse(sessionStorage.getItem("usuarioLogado"));
+  } catch {
+    return null;
+  }
+}
+
+function pegarToken() {
+  return sessionStorage.getItem("token");
+}
+
+function sairSistema() {
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
 /* ===== Exibir avisos (toast) ===== */
 function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   const msg = document.getElementById("mensagem-aviso");
@@ -11,7 +29,6 @@ function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   msg.textContent = mensagem;
   msg.className = `neo-toast neo-toast--${tipo}`;
   msg.style.display = "block";
-  msg.style.animation = "neo-slide-in 0.3s ease-out";
 
   clearTimeout(window.__msgTimer);
   window.__msgTimer = setTimeout(() => {
@@ -25,8 +42,14 @@ async function api(caminho, opcoes = {}) {
     ? caminho
     : `${API_BASE}${caminho.startsWith("/") ? caminho : "/" + caminho}`;
 
+  const token = pegarToken();
+
   const resposta = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...opcoes,
   });
 
@@ -61,11 +84,10 @@ async function enviarComando(id_veiculo, tipo, botao) {
 async function listarVeiculos() {
   const container = document.getElementById("lista-veiculos");
   if (!container) return;
-  container.innerHTML = `<div class="neo-loading">Carregando veículos...</div>`;
+  container.innerHTML = `<div class="neo-historico__vazio">Carregando veículos...</div>`;
 
   try {
     const veiculos = await api("/veiculos");
-    console.log("🔍 Veículos recebidos da API:", veiculos);
 
     if (!veiculos || veiculos.length === 0) {
       container.innerHTML = `<div class="neo-historico__vazio">Nenhum veículo encontrado.</div>`;
@@ -86,10 +108,8 @@ async function listarVeiculos() {
       bloco.className = "neo-veiculo neo-fade-in";
       bloco.innerHTML = `
         <div class="neo-veiculo__info">
-          <span class="neo-veiculo__modelo">${v.modelo || "Sem modelo"}</span>
-          <div class="neo-veiculo__detalhe">
-            <i data-feather="hash"></i> Placa: ${v.placa || "—"}
-          </div>
+          <span class="neo-veiculo__modelo">${v.nome || v.modelo || "Sem modelo"}</span>
+          <div class="neo-veiculo__detalhe"><i data-feather="hash"></i> IMEI: ${v.imei || "—"}</div>
           <div class="neo-veiculo__detalhe">
             <i data-feather="activity"></i> Status:
             <span class="neo-veiculo__status ${statusClass}">
@@ -109,10 +129,8 @@ async function listarVeiculos() {
       container.appendChild(bloco);
     });
 
-    // Recarregar ícones Feather (necessário após inserir HTML)
     if (typeof feather !== "undefined") feather.replace();
 
-    // Ativar eventos nos botões
     container.querySelectorAll("button[data-tipo]").forEach((botao) => {
       botao.addEventListener("click", async (e) => {
         const tipo = e.target.closest("button").dataset.tipo;
@@ -174,6 +192,20 @@ function iniciarMapa() {
 
 /* ===== Inicialização da página ===== */
 document.addEventListener("DOMContentLoaded", () => {
+  const usuario = pegarUsuario();
+  if (!usuario) {
+    location.href = "index.html";
+    return;
+  }
+
+  const spanBemVindo = document.getElementById("bem-vindo");
+  if (spanBemVindo) {
+    spanBemVindo.textContent = `Olá, ${usuario.nome || "usuário"}!`;
+  }
+
+  const botaoSair = document.getElementById("botao-sair");
+  if (botaoSair) botaoSair.addEventListener("click", sairSistema);
+
   const botaoHistorico = document.getElementById("botao-atualizar-comandos");
   if (botaoHistorico) {
     botaoHistorico.addEventListener("click", listarComandos);
@@ -182,9 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
   iniciarMapa();
   listarVeiculos();
   listarComandos();
-
-  const spanBemVindo = document.getElementById("bem-vindo");
-  if (spanBemVindo) spanBemVindo.textContent = "Olá, usuário visitante!";
 
   if (typeof feather !== "undefined") feather.replace();
 });
