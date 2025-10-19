@@ -1,7 +1,7 @@
 "use strict";
 
-// 🔗 URL base da API (ajustada para o backend real)
-const API_BASE = "https://neorastro.cloud";
+// 🔗 URL base da API (backend hospedado na VPS)
+const API_BASE = "https://api.neorastro.cloud";
 
 // 📋 Função para carregar a lista de usuários
 async function carregarUsuarios() {
@@ -9,7 +9,7 @@ async function carregarUsuarios() {
   corpo.innerHTML = `<tr><td colspan="5" class="mensagem">Carregando...</td></tr>`;
 
   try {
-    const resposta = await fetch(`${API_BASE}/admin/usuarios`);
+    const resposta = await fetch(`${API_BASE}/admin/usuarios`, { mode: "cors" });
     const usuarios = await resposta.json();
 
     if (!resposta.ok) throw new Error(usuarios.mensagem || "Erro ao carregar usuários.");
@@ -43,6 +43,7 @@ async function carregarUsuarios() {
       corpo.appendChild(linha);
     });
   } catch (e) {
+    console.error(e);
     corpo.innerHTML = `<tr><td colspan="5" class="mensagem">⚠️ Erro ao conectar com o servidor.</td></tr>`;
   }
 }
@@ -54,14 +55,15 @@ async function aprovarUsuario(id) {
   try {
     const resposta = await fetch(`${API_BASE}/admin/aprovar/${id}`, {
       method: "POST",
+      mode: "cors",
     });
-
     const resultado = await resposta.json();
 
     if (!resposta.ok) throw new Error(resultado.mensagem || "Erro ao aprovar usuário.");
     alert("✅ Usuário aprovado com sucesso!");
     carregarUsuarios();
   } catch (e) {
+    console.error(e);
     alert("❌ " + (e.message || "Erro ao aprovar usuário."));
   }
 }
@@ -73,18 +75,20 @@ async function removerUsuario(id) {
   try {
     const resposta = await fetch(`${API_BASE}/admin/remover/${id}`, {
       method: "DELETE",
+      mode: "cors",
     });
-
     const resultado = await resposta.json();
 
     if (!resposta.ok) throw new Error(resultado.mensagem || "Erro ao remover usuário.");
     alert("🗑️ Usuário removido com sucesso!");
     carregarUsuarios();
   } catch (e) {
+    console.error(e);
     alert("❌ " + (e.message || "Erro ao remover usuário."));
   }
 }
 
 // 🚀 Inicialização
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
+
 
