@@ -30,49 +30,51 @@
   function sairSistema() {
     sessionStorage.clear();
     localStorage.removeItem("usuarioNome");
-    location.href = "index.html"; // ✅ redireciona para o login
+    location.href = "index.html";
   }
 
   // =========================
   // Comunicação com o backend
   // =========================
-  async function listarVeiculos() {
+  async function apiRequisicao(url, opcoes = {}) {
     const token = pegarToken();
-    const resposta = await fetch(API.listar, {
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
+    const resposta = await fetch(url, {
       mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: "Bearer " + token } : {}),
+      },
+      ...opcoes,
     });
-    if (!resposta.ok) throw new Error("Erro ao listar veículos");
-    return await resposta.json();
+
+    if (resposta.status === 401) {
+      mostrarMensagem("⚠️ Sessão expirada. Faça login novamente.", true);
+      sairSistema();
+      throw new Error("Sessão expirada");
+    }
+
+    const dados = await resposta.json().catch(() => ({}));
+    if (!resposta.ok)
+      throw new Error(dados.erro || dados.mensagem || "Erro desconhecido.");
+
+    return dados;
+  }
+
+  async function listarVeiculos() {
+    return apiRequisicao(API.listar);
   }
 
   async function cadastrarVeiculo(nome, imei) {
-    const token = pegarToken();
-    const resposta = await fetch(API.cadastrar, {
+    return apiRequisicao(API.cadastrar, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      mode: "cors",
       body: JSON.stringify({ nome, imei }),
     });
-    if (!resposta.ok) throw new Error("Erro ao cadastrar veículo");
-    return await resposta.json();
   }
 
   async function removerVeiculo(id) {
-    const token = pegarToken();
-    const resposta = await fetch(API.remover(id), {
+    return apiRequisicao(API.remover(id), {
       method: "DELETE",
-      headers: { Authorization: "Bearer " + token },
-      mode: "cors",
     });
-    if (!resposta.ok) throw new Error("Erro ao remover veículo");
-    return await resposta.json();
   }
 
   // =========================
@@ -117,13 +119,13 @@
         <button class="remover">🗑️ Remover</button>
       `;
 
-      // Abrir no painel
+      // 🔍 Abrir no painel
       item.querySelector(".abrir").addEventListener("click", () => {
         sessionStorage.setItem("imeiSelecionado", v.imei);
         location.href = "painel.html";
       });
 
-      // Remover veículo
+      // 🗑️ Remover veículo
       item.querySelector(".remover").addEventListener("click", async () => {
         if (confirm(`Deseja realmente remover o veículo ${v.nome}?`)) {
           try {
@@ -185,7 +187,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     const usuario = pegarUsuario();
     if (!usuario) {
-      location.href = "index.html"; // ✅ redireciona ao login se não estiver autenticado
+      location.href = "index.html";
       return;
     }
 
