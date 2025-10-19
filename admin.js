@@ -1,20 +1,60 @@
 "use strict";
 
-// 🔗 URL base da API (backend hospedado na VPS)
+/* 🔗 URL base da API (backend hospedado na VPS) */
 const API_BASE = "https://api.neorastro.cloud";
 
-// 📋 Função para carregar a lista de usuários
+/* 🔑 Funções de sessão */
+function pegarToken() {
+  return sessionStorage.getItem("token");
+}
+
+function sairAdmin() {
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
+/* 🧠 Função genérica para chamadas da API com token */
+async function apiAdmin(endpoint, opcoes = {}) {
+  const token = pegarToken();
+
+  try {
+    const resposta = await fetch(
+      `${API_BASE}${endpoint.startsWith("/") ? endpoint : "/" + endpoint}`,
+      {
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        ...opcoes,
+      }
+    );
+
+    if (resposta.status === 401) {
+      alert("⚠️ Sessão expirada. Faça login novamente.");
+      sairAdmin();
+      throw new Error("Sessão expirada");
+    }
+
+    const dados = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(dados.mensagem || dados.erro || "Erro desconhecido.");
+
+    return dados;
+  } catch (erro) {
+    console.error("Erro na API admin:", erro);
+    throw erro;
+  }
+}
+
+/* 📋 Carregar lista de usuários */
 async function carregarUsuarios() {
   const corpo = document.getElementById("corpo-tabela");
   corpo.innerHTML = `<tr><td colspan="5" class="mensagem">Carregando...</td></tr>`;
 
   try {
-    const resposta = await fetch(`${API_BASE}/admin/usuarios`, { mode: "cors" });
-    const usuarios = await resposta.json();
+    const usuarios = await apiAdmin("/admin/usuarios");
 
-    if (!resposta.ok) throw new Error(usuarios.mensagem || "Erro ao carregar usuários.");
-
-    if (!usuarios.length) {
+    if (!usuarios || usuarios.length === 0) {
       corpo.innerHTML = `<tr><td colspan="5" class="mensagem">Nenhum usuário cadastrado.</td></tr>`;
       return;
     }
@@ -43,52 +83,36 @@ async function carregarUsuarios() {
       corpo.appendChild(linha);
     });
   } catch (e) {
-    console.error(e);
-    corpo.innerHTML = `<tr><td colspan="5" class="mensagem">⚠️ Erro ao conectar com o servidor.</td></tr>`;
+    corpo.innerHTML = `<tr><td colspan="5" class="mensagem">⚠️ Falha ao carregar usuários.</td></tr>`;
   }
 }
 
-// ✅ Função para aprovar um usuário
+/* ✅ Aprovar usuário */
 async function aprovarUsuario(id) {
   if (!confirm("Deseja aprovar este usuário?")) return;
 
   try {
-    const resposta = await fetch(`${API_BASE}/admin/aprovar/${id}`, {
-      method: "POST",
-      mode: "cors",
-    });
-    const resultado = await resposta.json();
-
-    if (!resposta.ok) throw new Error(resultado.mensagem || "Erro ao aprovar usuário.");
-    alert("✅ Usuário aprovado com sucesso!");
+    const resultado = await apiAdmin(`/admin/aprovar/${id}`, { method: "POST" });
+    alert(resultado.mensagem || "✅ Usuário aprovado com sucesso!");
     carregarUsuarios();
   } catch (e) {
-    console.error(e);
     alert("❌ " + (e.message || "Erro ao aprovar usuário."));
   }
 }
 
-// 🗑️ Função para remover usuário
+/* 🗑️ Remover usuário */
 async function removerUsuario(id) {
   if (!confirm("Tem certeza que deseja remover este usuário?")) return;
 
   try {
-    const resposta = await fetch(`${API_BASE}/admin/remover/${id}`, {
-      method: "DELETE",
-      mode: "cors",
-    });
-    const resultado = await resposta.json();
-
-    if (!resposta.ok) throw new Error(resultado.mensagem || "Erro ao remover usuário.");
-    alert("🗑️ Usuário removido com sucesso!");
+    const resultado = await apiAdmin(`/admin/remover/${id}`, { method: "DELETE" });
+    alert(resultado.mensagem || "🗑️ Usuário removido com sucesso!");
     carregarUsuarios();
   } catch (e) {
-    console.error(e);
     alert("❌ " + (e.message || "Erro ao remover usuário."));
   }
 }
 
-// 🚀 Inicialização
+/* 🚀 Inicialização */
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
-
 
