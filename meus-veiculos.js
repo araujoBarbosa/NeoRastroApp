@@ -13,7 +13,7 @@
   };
 
   // =========================
-  // Sessão
+  // Sessão e autenticação
   // =========================
   function pegarUsuario() {
     try {
@@ -30,7 +30,7 @@
   function sairSistema() {
     sessionStorage.clear();
     localStorage.removeItem("usuarioNome");
-    location.href = "login.html";
+    location.href = "index.html"; // ✅ redireciona para o login
   }
 
   // =========================
@@ -43,7 +43,7 @@
         Authorization: "Bearer " + token,
         "Content-Type": "application/json",
       },
-      credentials: "include",
+      mode: "cors",
     });
     if (!resposta.ok) throw new Error("Erro ao listar veículos");
     return await resposta.json();
@@ -57,7 +57,7 @@
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
-      credentials: "include",
+      mode: "cors",
       body: JSON.stringify({ nome, imei }),
     });
     if (!resposta.ok) throw new Error("Erro ao cadastrar veículo");
@@ -69,7 +69,7 @@
     const resposta = await fetch(API.remover(id), {
       method: "DELETE",
       headers: { Authorization: "Bearer " + token },
-      credentials: "include",
+      mode: "cors",
     });
     if (!resposta.ok) throw new Error("Erro ao remover veículo");
     return await resposta.json();
@@ -102,7 +102,7 @@
 
     container.innerHTML = "";
 
-    if (lista.length === 0) {
+    if (!lista || lista.length === 0) {
       container.innerHTML = "<p>Nenhum veículo cadastrado.</p>";
       return;
     }
@@ -125,7 +125,7 @@
 
       // Remover veículo
       item.querySelector(".remover").addEventListener("click", async () => {
-        if (confirm(`Tem certeza que deseja remover o veículo ${v.nome}?`)) {
+        if (confirm(`Deseja realmente remover o veículo ${v.nome}?`)) {
           try {
             await removerVeiculo(v.id);
             mostrarMensagem("✅ Veículo removido com sucesso!");
@@ -185,13 +185,13 @@
   document.addEventListener("DOMContentLoaded", () => {
     const usuario = pegarUsuario();
     if (!usuario) {
-      location.href = "login.html";
+      location.href = "index.html"; // ✅ redireciona ao login se não estiver autenticado
       return;
     }
 
     // Saudação
     const bemVindo = document.getElementById("bem-vindo");
-    if (bemVindo) bemVindo.textContent = `Olá, ${usuario.nome}!`;
+    if (bemVindo) bemVindo.textContent = `Olá, ${usuario.nome || "Usuário"}!`;
 
     // Botão sair
     const botaoSair = document.getElementById("botao-sair");
@@ -204,5 +204,6 @@
     ligarFormulario();
   });
 })();
+
 
 
