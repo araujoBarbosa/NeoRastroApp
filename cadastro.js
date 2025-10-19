@@ -16,6 +16,9 @@ function alternarVisibilidade(idDoCampo, botao) {
 (function () {
   "use strict";
 
+  // ✅ URL base da API
+  const API_BASE = "https://api.neorastro.cloud";
+
   // ===== Exibir mensagens =====
   function mostrarMensagem(elemento, texto, ehErro) {
     if (!elemento) return;
@@ -76,12 +79,10 @@ function alternarVisibilidade(idDoCampo, botao) {
       botaoCadastro.textContent = "Criando conta…";
 
       try {
-        // ✅ Comunicação com backend Flask na VPS
-        const resposta = await fetch("https://api.neorastro.cloud/api/cadastro", {
+        // ✅ Comunicação segura com backend Flask
+        const resposta = await fetch(`${API_BASE}/api/cadastro`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           mode: "cors",
           body: JSON.stringify({ nome, email, telefone, empresa, senha }),
         });
@@ -94,19 +95,14 @@ function alternarVisibilidade(idDoCampo, botao) {
             "✅ Cadastro realizado com sucesso! Redirecionando…",
             false
           );
-          setTimeout(() => {
-            window.location.href = "login.html";
-          }, 1500);
+          setTimeout(() => (window.location.href = "login.html"), 1500);
         } else {
-          mostrarMensagem(
-            mensagem,
-            dados.erro || "❌ Erro ao cadastrar. Tente novamente.",
-            true
-          );
+          const erro = dados.erro || dados.message || "❌ Erro ao cadastrar. Tente novamente.";
+          mostrarMensagem(mensagem, erro, true);
         }
       } catch (erro) {
-        console.error("Erro:", erro);
-        mostrarMensagem(mensagem, "❌ Falha na conexão com o servidor.", true);
+        console.error("Erro de conexão:", erro);
+        mostrarMensagem(mensagem, "❌ Falha na comunicação com o servidor.", true);
       } finally {
         botaoCadastro.disabled = false;
         botaoCadastro.textContent = "Criar conta";
