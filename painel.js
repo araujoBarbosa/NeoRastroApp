@@ -44,17 +44,36 @@ async function api(caminho, opcoes = {}) {
 
   const token = pegarToken();
 
-  const resposta = await fetch(url, {
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    ...opcoes,
-  });
+  try {
+    const resposta = await fetch(url, {
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      ...opcoes,
+    });
 
-  if (!resposta.ok) throw new Error("Erro ao acessar a API");
-  return await resposta.json();
+    // Se o token for inválido ou expirado
+    if (resposta.status === 401) {
+      mostrarAviso("⚠️ Sessão expirada. Faça login novamente.", "error");
+      sairSistema();
+      throw new Error("Sessão expirada");
+    }
+
+    const dados = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+      const erro = dados.erro || dados.mensagem || dados.message || "Erro ao acessar a API.";
+      throw new Error(erro);
+    }
+
+    return dados;
+  } catch (erro) {
+    console.error("Erro na API:", erro);
+    mostrarAviso(erro.message || "Falha ao conectar com a API.", "error");
+    throw erro;
+  }
 }
 
 /* ===== Enviar comando (bloquear/desbloquear) ===== */
