@@ -13,6 +13,8 @@ function alternarVisibilidade(idDoCampo, botao) {
 
 /* ===== Fluxo de Login ===== */
 (function iniciarLogin() {
+  const API_BASE = "https://api.neorastro.cloud"; // ✅ domínio HTTPS do backend
+
   const iniciar = () => {
     const formulario = document.getElementById("formulario-entrada");
     if (!formulario) return;
@@ -56,19 +58,20 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
-        // ✅ Comunicação com o backend Flask hospedado na VPS
-        const resposta = await fetch("https://api.neorastro.cloud/api/login", {
+        // ✅ Comunicação com o backend Flask (API segura)
+        const resposta = await fetch(`${API_BASE}/api/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
-          credentials: "omit",
+          credentials: "same-origin",
           body: JSON.stringify({ email, senha }),
         });
 
         const dados = await resposta.json().catch(() => ({}));
 
         if (!resposta.ok) {
-          const erro = dados.erro || dados.mensagem || "❌ E-mail ou senha incorretos.";
+          const erro =
+            dados.erro || dados.message || dados.mensagem || "❌ E-mail ou senha incorretos.";
           mostrarMensagem(erro, true);
           setCarregando(false);
           return;
@@ -76,7 +79,7 @@ function alternarVisibilidade(idDoCampo, botao) {
 
         mostrarMensagem("✅ Login realizado com sucesso! Redirecionando…", false);
 
-        // 🔐 Armazenar dados de sessão temporária
+        // 🔐 Armazenar sessão
         sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario || { email }));
         sessionStorage.setItem("token", dados.token || "");
 
@@ -119,6 +122,5 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
-
 
 
