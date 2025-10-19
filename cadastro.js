@@ -37,10 +37,20 @@ function alternarVisibilidade(idDoCampo, botao) {
 
     const campoNome = document.getElementById("campo-nome");
     const campoEmail = document.getElementById("campo-email");
+    const campoTelefone = document.getElementById("campo-telefone");
+    const campoEmpresa = document.getElementById("campo-empresa");
     const campoSenha = document.getElementById("campo-senha");
     const campoConfirmar = document.getElementById("campo-confirmar");
     const mensagem = document.getElementById("mensagem-cadastro");
     const botaoCadastro = document.getElementById("botao-cadastro");
+
+    // Ativar botão somente quando checkbox for marcado
+    const campoAceite = document.getElementById("campo-aceite");
+    if (campoAceite && botaoCadastro) {
+      campoAceite.addEventListener("change", () => {
+        botaoCadastro.disabled = !campoAceite.checked;
+      });
+    }
 
     formulario.addEventListener("submit", async (evento) => {
       evento.preventDefault();
@@ -48,11 +58,13 @@ function alternarVisibilidade(idDoCampo, botao) {
 
       const nome = campoNome.value.trim();
       const email = campoEmail.value.trim();
+      const telefone = campoTelefone.value.trim();
+      const empresa = campoEmpresa.value.trim();
       const senha = campoSenha.value;
       const confirmarSenha = campoConfirmar.value;
 
-      if (!nome || !email || !senha || !confirmarSenha) {
-        mostrarMensagem(mensagem, "⚠️ Preencha todos os campos.", true);
+      if (!nome || !email || !telefone || !senha || !confirmarSenha) {
+        mostrarMensagem(mensagem, "⚠️ Preencha todos os campos obrigatórios.", true);
         return;
       }
       if (senha !== confirmarSenha) {
@@ -71,7 +83,7 @@ function alternarVisibilidade(idDoCampo, botao) {
             "Content-Type": "application/json",
           },
           mode: "cors",
-          body: JSON.stringify({ nome, email, senha }),
+          body: JSON.stringify({ nome, email, telefone, empresa, senha }),
         });
 
         const dados = await resposta.json().catch(() => ({}));
