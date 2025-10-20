@@ -87,8 +87,8 @@
 
         <div id="mensagem-login" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Ação ajustada para enviar direto ao backend -->
-        <form id="formulario-entrada" method="post" action="https://api.neorastro.cloud/api/login" autocomplete="on" novalidate>
+        <!-- ✅ Corrigido: rota direta para o backend -->
+        <form id="formulario-entrada" method="post" action="https://api.neorastro.cloud/login" autocomplete="on" novalidate>
           <label class="so-leitor" for="campo-email">E-mail</label>
           <input id="campo-email" name="email" type="email" placeholder="Seu e-mail"
                  inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required />
@@ -126,6 +126,8 @@
 
   <script>
     "use strict";
+
+    const API_BASE = "https://api.neorastro.cloud"; // ✅ padronizado
 
     // Alternar visibilidade da senha
     function ligarAlternarSenha() {
@@ -172,14 +174,14 @@
             lembrar: document.getElementById("campo-lembrar").checked,
           };
 
-          const resposta = await fetch(formulario.action, {
+          const resposta = await fetch(`${API_BASE}/login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
             },
             body: JSON.stringify(dados),
-            mode: "cors"
+            mode: "cors",
           });
 
           if (!resposta.ok) {
@@ -190,6 +192,9 @@
             } catch (_) {}
             throw new Error(mensagemErro);
           }
+
+          const json = await resposta.json();
+          localStorage.setItem("token", json.token || "");
 
           mensagem.textContent = "✅ Login realizado! Redirecionando…";
           mensagem.classList.add("sucesso");
@@ -211,6 +216,7 @@
   </script>
 </body>
 </html>
+
 
 
 
