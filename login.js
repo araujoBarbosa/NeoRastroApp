@@ -58,7 +58,7 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
-        // ✅ Comunicação com o backend Flask (corrigido)
+        // ✅ Comunicação com o backend Flask (rota correta!)
         const resposta = await fetch(`${API_BASE}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -121,6 +121,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
+
 
 
 
