@@ -81,8 +81,8 @@
         <h2 id="titulo-cadastro">Crie sua conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Formulário enviando para API segura -->
-        <form id="formulario-cadastro" method="post" action="https://api.neorastro.cloud/api/cadastro" autocomplete="on" novalidate>
+        <!-- ✅ Formulário com rota corrigida -->
+        <form id="formulario-cadastro" method="post" action="https://api.neorastro.cloud/cadastrar" autocomplete="on" novalidate>
           
           <label class="so-leitor" for="campo-nome">Nome completo</label>
           <input id="campo-nome" name="nome" type="text" placeholder="Nome completo" required autocomplete="name" minlength="3" />
