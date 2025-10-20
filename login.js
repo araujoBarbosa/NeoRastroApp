@@ -67,11 +67,19 @@ function iniciar() {
       }
 
       const json = await resposta.json();
+
+      // ✅ Salva o token e o usuário (para o painel reconhecer)
       localStorage.setItem("token", json.token || "");
+      sessionStorage.setItem("token", json.token || "");
+      sessionStorage.setItem("usuarioLogado", JSON.stringify(json.usuario || {}));
 
       mensagem.textContent = "✅ Login realizado! Redirecionando…";
       mensagem.classList.add("sucesso");
-      setTimeout(() => { window.location.href = "painel.html"; }, 600);
+
+      // Redireciona após login bem-sucedido
+      setTimeout(() => {
+        window.location.href = "painel.html";
+      }, 800);
 
     } catch (erro) {
       mensagem.textContent = erro?.message || "❌ Não foi possível entrar. Tente novamente.";
@@ -86,7 +94,6 @@ function iniciar() {
 }
 
 document.addEventListener("DOMContentLoaded", iniciar);
-
 
 
 
