@@ -1,4 +1,9 @@
-// ===== Alternar visibilidade da senha =====
+"use strict";
+
+/* 🔗 URL base da API (backend hospedado na VPS) */
+const API_BASE = "https://api.neorastro.cloud";
+
+/* ===== Alternar visibilidade da senha ===== */
 function alternarVisibilidade(idDoCampo, botao) {
   try {
     const campo = document.getElementById(idDoCampo);
@@ -15,9 +20,6 @@ function alternarVisibilidade(idDoCampo, botao) {
 
 (function () {
   "use strict";
-
-  // ✅ URL base da API
-  const API_BASE = "https://api.neorastro.cloud";
 
   // ===== Exibir mensagens =====
   function mostrarMensagem(elemento, texto, ehErro) {
@@ -80,7 +82,7 @@ function alternarVisibilidade(idDoCampo, botao) {
 
       try {
         // ✅ Comunicação segura com backend Flask
-        const resposta = await fetch(`${API_BASE}/api/cadastro`, {
+        const resposta = await fetch(`${API_BASE}/cadastrar`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
@@ -117,6 +119,5 @@ function alternarVisibilidade(idDoCampo, botao) {
     ligarFormulario();
   }
 })();
-
 
 
