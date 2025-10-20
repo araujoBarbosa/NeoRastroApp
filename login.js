@@ -1,103 +1,92 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import mysql.connector
-import bcrypt
-import jwt
-from datetime import datetime, timedelta
+"use strict";
 
-app = Flask(__name__)
+const API_BASE = "https://api.neorastro.cloud"; // ✅ API da VPS
 
-# ✅ Permitir que o frontend (https://neorastro.cloud) acesse a API com segurança
-CORS(app, resources={r"/*": {"origins": "https://neorastro.cloud"}})
+// Alternar visibilidade da senha
+function ligarAlternarSenha() {
+  const botao = document.querySelector(".botao-alternar-senha");
+  if (!botao) return;
+  const alvoId = botao.getAttribute("aria-controls");
+  const campo = document.getElementById(alvoId);
+  if (!campo) return;
 
-# 🔑 Chave secreta para geração de tokens (não altere se já tiver uma configurada)
-app.config['SECRET_KEY'] = 'sua_chave_super_secreta_aqui'
+  botao.addEventListener("click", () => {
+    const visivel = campo.type === "text";
+    campo.type = visivel ? "password" : "text";
+    botao.setAttribute("aria-pressed", String(!visivel));
+    botao.setAttribute("aria-label", visivel ? "Mostrar senha" : "Ocultar senha");
+  });
+}
 
-# =====================================================
-# 🏠 Rota principal
-@app.route('/')
-def index():
-    return 'API NeoRastro rodando com sucesso!'
+function iniciar() {
+  const formulario = document.getElementById("formulario-entrada");
+  const botao = document.getElementById("botao-entrar");
+  const mensagem = document.getElementById("mensagem-login");
+  const email = document.getElementById("campo-email");
+  const senha = document.getElementById("campo-senha");
 
-# =====================================================
-# 🔍 Teste de status (para ver se a API está online)
-@app.route('/ping')
-def ping():
-    return jsonify({'status': 'ok'})
+  const atualizarBotao = () => {
+    botao.disabled = !(formulario.checkValidity() && email.value && senha.value);
+  };
+  formulario.addEventListener("input", atualizarBotao);
+  formulario.addEventListener("change", atualizarBotao);
 
-# =====================================================
-# 🔐 Login de usuários
-@app.route('/login', methods=['POST'])
-def login():
-    dados = request.get_json()
-    email = dados.get('email')
-    senha = dados.get('senha')
+  formulario.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    mensagem.textContent = "";
+    mensagem.classList.remove("erro", "sucesso");
 
-    if not email or not senha:
-        return jsonify({'erro': 'Preencha todos os campos!'}), 400
+    try {
+      botao.disabled = true;
+      botao.dataset.label = botao.textContent;
+      botao.textContent = "Entrando…";
 
-    try:
-        conexao = mysql.connector.connect(
-            host="localhost",
-            user="neorastro_user",
-            password="Jad123456789son@",
-            database="neorastro_db"
-        )
-        cursor = conexao.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
-        usuario = cursor.fetchone()
-        conexao.close()
+      const dados = {
+        email: email.value.trim(),
+        senha: senha.value,
+        lembrar: document.getElementById("campo-lembrar").checked,
+      };
 
-        if not usuario or not bcrypt.checkpw(senha.encode('utf-8'), usuario['senha'].encode('utf-8')):
-            return jsonify({'erro': 'E-mail ou senha incorretos!'}), 401
+      const resposta = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(dados),
+        mode: "cors",
+      });
 
-        token = jwt.encode({
-            'id': usuario['id'],
-            'exp': datetime.utcnow() + timedelta(hours=12)
-        }, app.config['SECRET_KEY'], algorithm='HS256')
+      if (!resposta.ok) {
+        let mensagemErro = "❌ Credenciais inválidas ou falha de rede.";
+        try {
+          const err = await resposta.json();
+          if (err && (err.mensagem || err.erro)) mensagemErro = err.mensagem || err.erro;
+        } catch (_) {}
+        throw new Error(mensagemErro);
+      }
 
-        return jsonify({'mensagem': 'Login bem-sucedido!', 'token': token, 'usuario': usuario})
+      const json = await resposta.json();
+      localStorage.setItem("token", json.token || "");
 
-    except Exception as e:
-        return jsonify({'erro': f'Erro interno: {str(e)}'}), 500
+      mensagem.textContent = "✅ Login realizado! Redirecionando…";
+      mensagem.classList.add("sucesso");
+      setTimeout(() => { window.location.href = "painel.html"; }, 600);
 
-# =====================================================
-# 📝 Cadastro de usuários
-@app.route('/cadastrar', methods=['POST'])
-def cadastrar():
-    try:
-        dados = request.get_json() or request.form
-        nome = dados.get('nome')
-        email = dados.get('email')
-        senha = dados.get('senha')
+    } catch (erro) {
+      mensagem.textContent = erro?.message || "❌ Não foi possível entrar. Tente novamente.";
+      mensagem.classList.add("erro");
+      botao.disabled = false;
+      botao.textContent = botao.dataset.label || "Entrar";
+    }
+  });
 
-        if not nome or not email or not senha:
-            return jsonify({'erro': 'Preencha todos os campos!'}), 400
+  atualizarBotao();
+  ligarAlternarSenha();
+}
 
-        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+document.addEventListener("DOMContentLoaded", iniciar);
 
-        conexao = mysql.connector.connect(
-            host="localhost",
-            user="neorastro_user",
-            password="Jad123456789son@",
-            database="neorastro_db"
-        )
-        cursor = conexao.cursor()
-        cursor.execute("INSERT INTO usuarios (nome, email, senha, status) VALUES (%s, %s, %s, %s)",
-                       (nome, email, senha_hash, 'pendente'))
-        conexao.commit()
-        conexao.close()
-
-        return jsonify({'mensagem': 'Cadastro recebido com sucesso!'})
-
-    except Exception as e:
-        return jsonify({'erro': f'Erro interno: {str(e)}'}), 500
-
-
-# =====================================================
-# 🚀 Inicialização do servidor Flask
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
 
 
 
