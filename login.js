@@ -1,126 +1,103 @@
-"use strict";
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import mysql.connector
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
 
-/* ===== Alternar visibilidade da senha ===== */
-function alternarVisibilidade(idDoCampo, botao) {
-  const campo = document.getElementById(idDoCampo);
-  if (!campo || !botao) return;
+app = Flask(__name__)
 
-  const visivel = campo.type === "text";
-  campo.type = visivel ? "password" : "text";
-  botao.textContent = visivel ? "👁️" : "🙈";
-  botao.setAttribute("aria-label", visivel ? "Mostrar senha" : "Ocultar senha");
-}
+# ✅ Permitir que o frontend (https://neorastro.cloud) acesse a API com segurança
+CORS(app, resources={r"/*": {"origins": "https://neorastro.cloud"}})
 
-/* ===== Fluxo de Login ===== */
-(function iniciarLogin() {
-  const API_BASE = "https://api.neorastro.cloud"; // ✅ domínio HTTPS do backend
+# 🔑 Chave secreta para geração de tokens (não altere se já tiver uma configurada)
+app.config['SECRET_KEY'] = 'sua_chave_super_secreta_aqui'
 
-  const iniciar = () => {
-    const formulario = document.getElementById("formulario-entrada");
-    if (!formulario) return;
+# =====================================================
+# 🏠 Rota principal
+@app.route('/')
+def index():
+    return 'API NeoRastro rodando com sucesso!'
 
-    const campoEmail = document.getElementById("campo-email");
-    const campoSenha = document.getElementById("campo-senha");
-    const botaoEntrar = document.getElementById("botao-entrar");
-    const mensagem = document.getElementById("mensagem-login");
-    const botaoOlho = document.querySelector(".botao-alternar-senha");
+# =====================================================
+# 🔍 Teste de status (para ver se a API está online)
+@app.route('/ping')
+def ping():
+    return jsonify({'status': 'ok'})
 
-    // 👁️ Ativar o "olhinho"
-    if (botaoOlho && campoSenha) {
-      botaoOlho.addEventListener("click", () =>
-        alternarVisibilidade(campoSenha.id, botaoOlho)
-      );
-    }
+# =====================================================
+# 🔐 Login de usuários
+@app.route('/login', methods=['POST'])
+def login():
+    dados = request.get_json()
+    email = dados.get('email')
+    senha = dados.get('senha')
 
-    if (!campoEmail || !campoSenha || !botaoEntrar) return;
+    if not email or not senha:
+        return jsonify({'erro': 'Preencha todos os campos!'}), 400
 
-    // 🔄 Habilitar botão somente se os campos estiverem preenchidos
-    const atualizarBotao = () => {
-      const valido = campoEmail.value.trim() && campoSenha.value;
-      botaoEntrar.disabled = !valido;
-    };
-    formulario.addEventListener("input", atualizarBotao);
-    atualizarBotao();
+    try:
+        conexao = mysql.connector.connect(
+            host="localhost",
+            user="neorastro_user",
+            password="Jad123456789son@",
+            database="neorastro_db"
+        )
+        cursor = conexao.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
+        usuario = cursor.fetchone()
+        conexao.close()
 
-    // 🚀 Envio do formulário
-    formulario.addEventListener("submit", async (evento) => {
-      evento.preventDefault();
+        if not usuario or not bcrypt.checkpw(senha.encode('utf-8'), usuario['senha'].encode('utf-8')):
+            return jsonify({'erro': 'E-mail ou senha incorretos!'}), 401
 
-      const email = campoEmail.value.trim();
-      const senha = campoSenha.value;
-      limparMensagem();
+        token = jwt.encode({
+            'id': usuario['id'],
+            'exp': datetime.utcnow() + timedelta(hours=12)
+        }, app.config['SECRET_KEY'], algorithm='HS256')
 
-      if (!email || !senha) {
-        mostrarMensagem("⚠️ Preencha todos os campos.", true);
-        return;
-      }
+        return jsonify({'mensagem': 'Login bem-sucedido!', 'token': token, 'usuario': usuario})
 
-      setCarregando(true);
+    except Exception as e:
+        return jsonify({'erro': f'Erro interno: {str(e)}'}), 500
 
-      try {
-        // ✅ Comunicação com o backend Flask (rota correta!)
-        const resposta = await fetch(`${API_BASE}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          mode: "cors",
-          body: JSON.stringify({ email, senha }),
-        });
+# =====================================================
+# 📝 Cadastro de usuários
+@app.route('/cadastrar', methods=['POST'])
+def cadastrar():
+    try:
+        dados = request.get_json() or request.form
+        nome = dados.get('nome')
+        email = dados.get('email')
+        senha = dados.get('senha')
 
-        const dados = await resposta.json().catch(() => ({}));
+        if not nome or not email or not senha:
+            return jsonify({'erro': 'Preencha todos os campos!'}), 400
 
-        if (!resposta.ok) {
-          const erro =
-            dados.erro || dados.message || dados.mensagem || "❌ E-mail ou senha incorretos.";
-          mostrarMensagem(erro, true);
-          setCarregando(false);
-          return;
-        }
+        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        mostrarMensagem("✅ Login realizado com sucesso! Redirecionando…", false);
+        conexao = mysql.connector.connect(
+            host="localhost",
+            user="neorastro_user",
+            password="Jad123456789son@",
+            database="neorastro_db"
+        )
+        cursor = conexao.cursor()
+        cursor.execute("INSERT INTO usuarios (nome, email, senha, status) VALUES (%s, %s, %s, %s)",
+                       (nome, email, senha_hash, 'pendente'))
+        conexao.commit()
+        conexao.close()
 
-        // 🔐 Armazenar sessão
-        sessionStorage.setItem("usuarioLogado", JSON.stringify(dados.usuario || { email }));
-        sessionStorage.setItem("token", dados.token || "");
+        return jsonify({'mensagem': 'Cadastro recebido com sucesso!'})
 
-        setTimeout(() => {
-          window.location.href = "painel.html";
-        }, 800);
-      } catch (erro) {
-        console.error("Erro de conexão:", erro);
-        mostrarMensagem("❌ Não foi possível conectar ao servidor.", true);
-      } finally {
-        setCarregando(false);
-      }
-    });
+    except Exception as e:
+        return jsonify({'erro': f'Erro interno: {str(e)}'}), 500
 
-    // --- Funções auxiliares ---
-    function setCarregando(ativo) {
-      if (!botaoEntrar) return;
-      botaoEntrar.disabled = !!ativo;
-      botaoEntrar.textContent = ativo ? "Entrando…" : "Entrar";
-    }
 
-    function limparMensagem() {
-      if (mensagem) {
-        mensagem.textContent = "";
-        mensagem.classList.remove("erro", "sucesso");
-      }
-    }
-
-    function mostrarMensagem(texto, erro = false) {
-      if (!mensagem) return;
-      mensagem.textContent = texto;
-      mensagem.classList.remove("erro", "sucesso");
-      mensagem.classList.add(erro ? "erro" : "sucesso");
-    }
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", iniciar, { once: true });
-  } else {
-    iniciar();
-  }
-})();
+# =====================================================
+# 🚀 Inicialização do servidor Flask
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
 
 
 
