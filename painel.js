@@ -6,6 +6,7 @@ const API_BASE = "https://api.neorastro.cloud";
 /* ===== Controle de sessão (corrigido para manter login) ===== */
 function pegarUsuario() {
   try {
+    // 🔧 garante compatibilidade com login.js
     return (
       JSON.parse(sessionStorage.getItem("usuarioLogado")) ||
       JSON.parse(localStorage.getItem("usuarioLogado"))
@@ -24,8 +25,7 @@ function pegarToken() {
 
 function sairSistema() {
   sessionStorage.clear();
-  localStorage.removeItem("token");
-  localStorage.removeItem("usuarioLogado");
+  localStorage.clear(); // ✅ limpa ambos para evitar conflito
   location.href = "index.html";
 }
 
@@ -217,14 +217,16 @@ function iniciarMapa() {
 /* ===== Inicialização da página ===== */
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
-  if (!usuario) {
+
+  // 🔧 Proteção adicional: se não houver usuário, tenta token antes de redirecionar
+  if (!usuario && !pegarToken()) {
     location.href = "index.html";
     return;
   }
 
   const spanBemVindo = document.getElementById("bem-vindo");
   if (spanBemVindo) {
-    spanBemVindo.textContent = `Olá, ${usuario.nome || "usuário"}!`;
+    spanBemVindo.textContent = `Olá, ${usuario?.nome || "usuário"}!`;
   }
 
   const botaoSair = document.getElementById("botao-sair");
