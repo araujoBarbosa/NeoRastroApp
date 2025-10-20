@@ -58,12 +58,11 @@ function alternarVisibilidade(idDoCampo, botao) {
       setCarregando(true);
 
       try {
-        // ✅ Comunicação com o backend Flask (API segura)
-        const resposta = await fetch(`${API_BASE}/api/login`, {
+        // ✅ Comunicação com o backend Flask (corrigido)
+        const resposta = await fetch(`${API_BASE}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
-          credentials: "same-origin",
           body: JSON.stringify({ email, senha }),
         });
 
@@ -122,5 +121,6 @@ function alternarVisibilidade(idDoCampo, botao) {
     iniciar();
   }
 })();
+
 
 
