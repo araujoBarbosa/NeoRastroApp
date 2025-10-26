@@ -3,33 +3,30 @@
 /* ===== Configuracao da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Controle de sessao (corrigido para manter login) ===== */
+/* ===== Controle de sessao ===== */
 function pegarUsuario() {
   try {
-    // 🔧 garante compatibilidade com login.js
-    return (
-      JSON.parse(sessionStorage.getItem("usuarioLogado")) ||
-      JSON.parse(localStorage.getItem("usuarioLogado"))
-    );
+    const userSession = sessionStorage.getItem("usuarioLogado");
+    const userLocal = localStorage.getItem("usuarioLogado");
+    return userSession ? JSON.parse(userSession) : userLocal ? JSON.parse(userLocal) : null;
   } catch {
     return null;
   }
 }
 
 function pegarToken() {
-  return (
-    sessionStorage.getItem("token") ||
-    localStorage.getItem("token")
-  );
+  const tokenSession = sessionStorage.getItem("token");
+  const tokenLocal = localStorage.getItem("token");
+  return tokenSession || tokenLocal || null;
 }
 
 function sairSistema() {
   sessionStorage.clear();
-  localStorage.clear(); // ✅ limpa ambos para evitar conflito
+  localStorage.clear();
   location.href = "index.html";
 }
 
-/* ===== Exibir avisos (toast) ===== */
+/* ===== Exibir avisos ===== */
 function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   const msg = document.getElementById("mensagem-aviso");
   if (!msg) return;
@@ -44,7 +41,7 @@ function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   }, tempo);
 }
 
-/* ===== Funcao generica para chamadas de API ===== */
+/* ===== Funcao generica da API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -57,12 +54,13 @@ async function api(caminho, opcoes = {}) {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(token && token !== "login_local" ? { Authorization: `Bearer ${token}` } : {}),
       },
       ...opcoes,
     });
 
-    if (resposta.status === 401) {
+    // Se o token for local (simulado), ignora 401
+    if (resposta.status === 401 && token !== "login_local") {
       mostrarAviso("⚠️ Sessao expirada. Faca login novamente.", "error");
       sairSistema();
       throw new Error("Sessao expirada");
@@ -83,7 +81,7 @@ async function api(caminho, opcoes = {}) {
   }
 }
 
-/* ===== Enviar comando (bloquear/desbloquear) ===== */
+/* ===== Enviar comando ===== */
 async function enviarComando(id_veiculo, tipo, botao) {
   try {
     botao.classList.add("neo-btn--loading");
@@ -217,9 +215,11 @@ function iniciarMapa() {
 /* ===== Inicializacao da pagina ===== */
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
+  const token = pegarToken();
 
-  // 🔧 Protecao adicional: se nao houver usuario, tenta token antes de redirecionar
-  if (!usuario && !pegarToken()) {
+  // ✅ Nova logica: aceita login local e usuario salvo
+  if ((!usuario || Object.keys(usuario).length === 0) && !token) {
+    console.warn("Nenhum usuario logado encontrado, voltando ao login...");
     location.href = "index.html";
     return;
   }
@@ -243,6 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof feather !== "undefined") feather.replace();
 });
+
 
 
 
