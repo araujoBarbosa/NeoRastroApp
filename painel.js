@@ -1,9 +1,9 @@
 "use strict";
 
-/* ===== Configuração da API ===== */
+/* ===== Configuracao da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Controle de sessão (corrigido para manter login) ===== */
+/* ===== Controle de sessao (corrigido para manter login) ===== */
 function pegarUsuario() {
   try {
     // 🔧 garante compatibilidade com login.js
@@ -44,7 +44,7 @@ function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   }, tempo);
 }
 
-/* ===== Função genérica para chamadas de API ===== */
+/* ===== Funcao generica para chamadas de API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -63,9 +63,9 @@ async function api(caminho, opcoes = {}) {
     });
 
     if (resposta.status === 401) {
-      mostrarAviso("⚠️ Sessão expirada. Faça login novamente.", "error");
+      mostrarAviso("⚠️ Sessao expirada. Faca login novamente.", "error");
       sairSistema();
-      throw new Error("Sessão expirada");
+      throw new Error("Sessao expirada");
     }
 
     const dados = await resposta.json().catch(() => ({}));
@@ -106,17 +106,17 @@ async function enviarComando(id_veiculo, tipo, botao) {
   }
 }
 
-/* ===== Listar veículos ===== */
+/* ===== Listar veiculos ===== */
 async function listarVeiculos() {
   const container = document.getElementById("lista-veiculos");
   if (!container) return;
-  container.innerHTML = `<div class="neo-historico__vazio">Carregando veículos...</div>`;
+  container.innerHTML = `<div class="neo-historico__vazio">Carregando veiculos...</div>`;
 
   try {
     const veiculos = await api("/veiculos");
 
     if (!veiculos || veiculos.length === 0) {
-      container.innerHTML = `<div class="neo-historico__vazio">Nenhum veículo encontrado.</div>`;
+      container.innerHTML = `<div class="neo-historico__vazio">Nenhum veiculo encontrado.</div>`;
       return;
     }
 
@@ -166,12 +166,12 @@ async function listarVeiculos() {
     });
   } catch (e) {
     console.error(e);
-    container.innerHTML = `<div class="neo-historico__vazio">Erro ao carregar veículos.</div>`;
+    container.innerHTML = `<div class="neo-historico__vazio">Erro ao carregar veiculos.</div>`;
     mostrarAviso("Falha ao conectar com a API.", "error");
   }
 }
 
-/* ===== Listar histórico de comandos ===== */
+/* ===== Listar historico de comandos ===== */
 async function listarComandos() {
   const lista = document.getElementById("lista-comandos");
   if (!lista) return;
@@ -200,7 +200,7 @@ async function listarComandos() {
   } catch (e) {
     console.error(e);
     lista.innerHTML = `<li class="neo-historico__vazio">Erro ao buscar comandos.</li>`;
-    mostrarAviso("Erro ao carregar histórico.", "error");
+    mostrarAviso("Erro ao carregar historico.", "error");
   }
 }
 
@@ -214,11 +214,11 @@ function iniciarMapa() {
   }).addTo(mapa);
 }
 
-/* ===== Inicialização da página ===== */
+/* ===== Inicializacao da pagina ===== */
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
 
-  // 🔧 Proteção adicional: se não houver usuário, tenta token antes de redirecionar
+  // 🔧 Protecao adicional: se nao houver usuario, tenta token antes de redirecionar
   if (!usuario && !pegarToken()) {
     location.href = "index.html";
     return;
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const spanBemVindo = document.getElementById("bem-vindo");
   if (spanBemVindo) {
-    spanBemVindo.textContent = `Olá, ${usuario?.nome || "usuário"}!`;
+    spanBemVindo.textContent = `Ola, ${usuario?.nome || "usuario"}!`;
   }
 
   const botaoSair = document.getElementById("botao-sair");
