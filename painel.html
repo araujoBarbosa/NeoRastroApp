@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#1d4ed8" />
-  <title>NeoRastro — Painel</title>
+  <title>NeoRastro - Painel</title>
 
-  <!-- ✅ Política de segurança -->
+  <!-- ✅ Politica de seguranca -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data: blob:;
     img-src 'self' data: https://*;
@@ -104,11 +104,11 @@
   <header class="painel-header">
     <div class="painel-header__marca">
       <img src="favicon.svg" alt="Logo NeoRastro" width="32" height="32" />
-      <h1 class="painel-header__titulo">NeoRastro — Painel</h1>
+      <h1 class="painel-header__titulo">NeoRastro - Painel</h1>
     </div>
     <div class="painel-header__acoes">
-      <!-- ✅ Nome dinâmico do usuário -->
-      <span id="bem-vindo" class="painel-header__bem-vindo">Olá!</span>
+      <!-- ✅ Nome dinamico do usuario -->
+      <span id="bem-vindo" class="painel-header__bem-vindo">Ola!</span>
       <button id="botao-sair" type="button" class="neo-btn neo-btn--primary">
         <i data-feather="log-out"></i> Sair
       </button>
@@ -118,15 +118,15 @@
   <main class="painel-main" role="main">
     <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
 
-    <aside class="painel-lateral" aria-label="Painel de veículos e comandos">
-      <h2><i data-feather="truck"></i> Meus veículos</h2>
+    <aside class="painel-lateral" aria-label="Painel de veiculos e comandos">
+      <h2><i data-feather="truck"></i> Meus veiculos</h2>
       <div id="lista-veiculos"></div>
 
       <div class="neo-historico">
-        <h3><i data-feather="clock"></i> Histórico de comandos</h3>
+        <h3><i data-feather="clock"></i> Historico de comandos</h3>
         <ul id="lista-comandos" class="neo-historico__lista"></ul>
         <button id="botao-atualizar-comandos" class="neo-btn neo-btn--secondary" style="width:100%;">
-          <i data-feather="refresh-cw"></i> Atualizar histórico
+          <i data-feather="refresh-cw"></i> Atualizar historico
         </button>
       </div>
     </aside>
@@ -137,16 +137,16 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script src="painel.js"></script>
 
-  <!-- ✅ Script extra: mantém login e mostra nome -->
+  <!-- ✅ Script extra: mantem login e mostra nome -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const usuarioLogado = JSON.parse(sessionStorage.getItem("usuarioLogado") || "{}");
       const nomeSpan = document.getElementById("bem-vindo");
 
       if (usuarioLogado && usuarioLogado.nome) {
-        nomeSpan.textContent = `Olá, ${usuarioLogado.nome}!`;
+        nomeSpan.textContent = `Ola, ${usuarioLogado.nome}!`;
       } else {
-        nomeSpan.textContent = "Olá, usuário!";
+        nomeSpan.textContent = "Ola, usuario!";
       }
 
       if (typeof feather !== "undefined") feather.replace();
