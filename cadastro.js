@@ -35,7 +35,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     elemento.classList.remove("erro", "sucesso");
   }
 
-  // ===== Configurar formulário =====
+  // ===== Configurar formulario =====
   function ligarFormulario() {
     const formulario = document.getElementById("formulario-cadastro");
     if (!formulario) return;
@@ -49,7 +49,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     const mensagem = document.getElementById("mensagem-cadastro");
     const botaoCadastro = document.getElementById("botao-cadastro");
 
-    // Ativar botão somente quando checkbox for marcado
+    // Ativar botao somente quando checkbox for marcado
     const campoAceite = document.getElementById("campo-aceite");
     if (campoAceite && botaoCadastro) {
       campoAceite.addEventListener("change", () => {
@@ -69,11 +69,11 @@ function alternarVisibilidade(idDoCampo, botao) {
       const confirmarSenha = campoConfirmar.value;
 
       if (!nome || !email || !telefone || !senha || !confirmarSenha) {
-        mostrarMensagem(mensagem, "⚠️ Preencha todos os campos obrigatórios.", true);
+        mostrarMensagem(mensagem, "⚠️ Preencha todos os campos obrigatorios.", true);
         return;
       }
       if (senha !== confirmarSenha) {
-        mostrarMensagem(mensagem, "⚠️ As senhas não coincidem.", true);
+        mostrarMensagem(mensagem, "⚠️ As senhas nao coincidem.", true);
         return;
       }
 
@@ -81,7 +81,7 @@ function alternarVisibilidade(idDoCampo, botao) {
       botaoCadastro.textContent = "Criando conta…";
 
       try {
-        // ✅ Comunicação segura com backend Flask
+        // ✅ Comunicacao segura com backend Flask
         const resposta = await fetch(`${API_BASE}/cadastrar`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -103,8 +103,8 @@ function alternarVisibilidade(idDoCampo, botao) {
           mostrarMensagem(mensagem, erro, true);
         }
       } catch (erro) {
-        console.error("Erro de conexão:", erro);
-        mostrarMensagem(mensagem, "❌ Falha na comunicação com o servidor.", true);
+        console.error("Erro de conexao:", erro);
+        mostrarMensagem(mensagem, "❌ Falha na comunicacao com o servidor.", true);
       } finally {
         botaoCadastro.disabled = false;
         botaoCadastro.textContent = "Criar conta";
@@ -112,7 +112,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     });
   }
 
-  // ===== Inicialização =====
+  // ===== Inicializacao =====
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", ligarFormulario, { once: true });
   } else {
