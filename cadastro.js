@@ -78,11 +78,11 @@ function alternarVisibilidade(idDoCampo, botao) {
       }
 
       botaoCadastro.disabled = true;
-      botaoCadastro.textContent = "Criando conta…";
+      botaoCadastro.textContent = "Criando conta...";
 
       try {
-        // ✅ Comunicacao segura com backend Flask
-        const resposta = await fetch(`${API_BASE}/cadastrar`, {
+        // ✅ Comunicacao segura com backend Flask (rota correta: /cadastro)
+        const resposta = await fetch(`${API_BASE}/cadastro`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
@@ -94,7 +94,7 @@ function alternarVisibilidade(idDoCampo, botao) {
         if (resposta.ok) {
           mostrarMensagem(
             mensagem,
-            "✅ Cadastro realizado com sucesso! Redirecionando…",
+            "✅ Cadastro realizado com sucesso! Redirecionando...",
             false
           );
           setTimeout(() => (window.location.href = "login.html"), 1500);
@@ -119,5 +119,6 @@ function alternarVisibilidade(idDoCampo, botao) {
     ligarFormulario();
   }
 })();
+
 
 
