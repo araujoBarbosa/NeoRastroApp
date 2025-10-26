@@ -27,7 +27,7 @@ body {
   line-height: 1.5;
 }
 
-/* Utilitários */
+/* Utilitarios */
 .container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 1rem; }
 
 .cartao-escuro {
@@ -45,7 +45,7 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Botões */
+/* Botoes */
 button {
   padding: 0.75rem 1rem;
   background-color: var(--cor-marca);
@@ -79,7 +79,7 @@ input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2p
   * { transition: none !important; animation: none !important; }
 }
 
-/* ========== Página: Autenticação (login/cadastro) ========== */
+/* ========== Pagina: Autenticacao (login/cadastro) ========== */
 .pagina--autenticacao {
   background:
     linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.45)),
@@ -96,7 +96,7 @@ input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2p
   display: flex; flex-direction: column; align-items: center;
 }
 
-/* Cabeçalho da autenticação */
+/* Cabecalho da autenticacao */
 .pagina--autenticacao header {
   width: 100%; max-width: 800px;
   display: flex; gap: 1rem; align-items: center; justify-content: space-between;
@@ -108,7 +108,7 @@ input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2p
   flex-grow: 1;
 }
 
-/* Cartões de formulário */
+/* Cartoes de formulario */
 .pagina--autenticacao .secao-formulario {
   width: 100%; max-width: 420px;
   padding: 2rem;
@@ -146,7 +146,7 @@ input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2p
 }
 .links a:hover { color: var(--cor-destaque); text-decoration: underline; }
 
-/* Responsividade da autenticação */
+/* Responsividade da autenticacao */
 @media (max-width: 480px) {
   .pagina--autenticacao header { flex-direction: column; gap: 1rem; }
   .pagina--autenticacao header h1 { font-size: 2rem; text-align: center; }
@@ -154,11 +154,11 @@ input:focus-visible { outline: 2px solid var(--cor-destaque); outline-offset: 2p
   input, button { font-size: .95rem; }
 }
 
-/* ========== Página: Painel (dashboard) ========== */
+/* ========== Pagina: Painel (dashboard) ========== */
 .pagina--painel { background: #0f172a; min-height: 100dvh; }
 .pagina--painel .container { padding-top: 20px; padding-bottom: 20px; }
 
-/* Cabeçalho do painel */
+/* Cabecalho do painel */
 .pagina--painel header {
   display: flex; justify-content: space-between; align-items: center;
   background: #1d4ed8; color: #fff;
@@ -200,7 +200,7 @@ button.suave { background:#374151; color:#e5e7eb; }
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* ========== Página: Meus Veículos ========== */
+/* ========== Pagina: Meus Veiculos ========== */
 #lista-veiculos { margin-top: 1rem; }
 .veiculo-item {
   border: 1px solid var(--cor-borda);
@@ -224,7 +224,7 @@ button.suave { background:#374151; color:#e5e7eb; }
 .mensagem.erro { background:#fee2e2; color:#7f1d1d; }
 .mensagem.sucesso { background:#dcfce7; color:#14532d; }
 
-/* Rodapé opcional */
+/* Rodape opcional */
 footer {
   text-align: center;
   padding: 20px;
