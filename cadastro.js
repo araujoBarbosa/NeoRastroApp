@@ -8,14 +8,23 @@ function alternarVisibilidade(idDoCampo, botao) {
   try {
     const campo = document.getElementById(idDoCampo);
     if (!campo) return;
+
+    // ✅ Armazena o valor atual da senha para evitar duplicação
+    const valorAtual = campo.value;
     const estaVisivel = campo.type === "text";
     campo.type = estaVisivel ? "password" : "text";
+
+    // ✅ Restaura o valor sem perder ou duplicar caracteres
+    campo.value = valorAtual;
+
     if (botao) {
       botao.textContent = estaVisivel ? "👁️" : "🙈";
       botao.setAttribute("aria-pressed", String(!estaVisivel));
       botao.setAttribute("aria-label", estaVisivel ? "Mostrar senha" : "Ocultar senha");
     }
-  } catch {}
+  } catch (erro) {
+    console.error("Erro ao alternar visibilidade:", erro);
+  }
 }
 
 (function () {
