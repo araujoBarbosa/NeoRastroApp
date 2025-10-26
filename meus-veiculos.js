@@ -2,7 +2,7 @@
   "use strict";
 
   // =========================
-  // Configurações globais
+  // Configuracoes globais
   // =========================
   const API_BASE = "https://api.neorastro.cloud";
 
@@ -13,7 +13,7 @@
   };
 
   // =========================
-  // Sessão e autenticação
+  // Sessao e autenticacao
   // =========================
   function pegarUsuario() {
     try {
@@ -34,7 +34,7 @@
   }
 
   // =========================
-  // Comunicação com o backend
+  // Comunicacao com o backend
   // =========================
   async function apiRequisicao(url, opcoes = {}) {
     const token = pegarToken();
@@ -48,9 +48,9 @@
     });
 
     if (resposta.status === 401) {
-      mostrarMensagem("⚠️ Sessão expirada. Faça login novamente.", true);
+      mostrarMensagem("⚠️ Sessao expirada. Faca login novamente.", true);
       sairSistema();
-      throw new Error("Sessão expirada");
+      throw new Error("Sessao expirada");
     }
 
     const dados = await resposta.json().catch(() => ({}));
@@ -96,7 +96,7 @@
   }
 
   // =========================
-  // Manipulação de DOM
+  // Manipulacao de DOM
   // =========================
   function renderizarVeiculos(lista) {
     const container = document.getElementById("lista-veiculos");
@@ -105,7 +105,7 @@
     container.innerHTML = "";
 
     if (!lista || lista.length === 0) {
-      container.innerHTML = "<p>Nenhum veículo cadastrado.</p>";
+      container.innerHTML = "<p>Nenhum veiculo cadastrado.</p>";
       return;
     }
 
@@ -125,16 +125,16 @@
         location.href = "painel.html";
       });
 
-      // 🗑️ Remover veículo
+      // 🗑️ Remover veiculo
       item.querySelector(".remover").addEventListener("click", async () => {
-        if (confirm(`Deseja realmente remover o veículo ${v.nome}?`)) {
+        if (confirm(`Deseja realmente remover o veiculo ${v.nome}?`)) {
           try {
             await removerVeiculo(v.id);
-            mostrarMensagem("✅ Veículo removido com sucesso!");
+            mostrarMensagem("✅ Veiculo removido com sucesso!");
             carregarVeiculos();
           } catch (erro) {
-            console.error("Erro ao remover veículo:", erro);
-            mostrarMensagem("❌ Erro ao remover veículo.", true);
+            console.error("Erro ao remover veiculo:", erro);
+            mostrarMensagem("❌ Erro ao remover veiculo.", true);
           }
         }
       });
@@ -148,8 +148,8 @@
       const veiculos = await listarVeiculos();
       renderizarVeiculos(veiculos);
     } catch (erro) {
-      console.error("Erro ao carregar veículos:", erro);
-      mostrarMensagem("❌ Não foi possível carregar os veículos.", true);
+      console.error("Erro ao carregar veiculos:", erro);
+      mostrarMensagem("❌ Nao foi possivel carregar os veiculos.", true);
     }
   }
 
@@ -172,17 +172,17 @@
       try {
         await cadastrarVeiculo(nome, imei);
         formulario.reset();
-        mostrarMensagem("✅ Veículo cadastrado com sucesso!");
+        mostrarMensagem("✅ Veiculo cadastrado com sucesso!");
         carregarVeiculos();
       } catch (erro) {
-        console.error("Erro ao cadastrar veículo:", erro);
-        mostrarMensagem("❌ Erro ao cadastrar veículo.", true);
+        console.error("Erro ao cadastrar veiculo:", erro);
+        mostrarMensagem("❌ Erro ao cadastrar veiculo.", true);
       }
     });
   }
 
   // =========================
-  // Inicialização
+  // Inicializacao
   // =========================
   document.addEventListener("DOMContentLoaded", () => {
     const usuario = pegarUsuario();
@@ -191,21 +191,22 @@
       return;
     }
 
-    // Saudação
+    // Saudacao
     const bemVindo = document.getElementById("bem-vindo");
-    if (bemVindo) bemVindo.textContent = `Olá, ${usuario.nome || "Usuário"}!`;
+    if (bemVindo) bemVindo.textContent = `Ola, ${usuario.nome || "Usuario"}!`;
 
-    // Botão sair
+    // Botao sair
     const botaoSair = document.getElementById("botao-sair");
     if (botaoSair) botaoSair.addEventListener("click", sairSistema);
 
-    // Carregar veículos
+    // Carregar veiculos
     carregarVeiculos();
 
-    // Formulário de cadastro
+    // Formulario de cadastro
     ligarFormulario();
   });
 })();
+
 
 
 
