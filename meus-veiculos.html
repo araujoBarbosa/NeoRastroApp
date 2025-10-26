@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#1d4ed8" />
-  <title>NeoRastro — Meus Veículos</title>
+  <title>NeoRastro - Meus Veiculos</title>
 
-  <!-- ✅ Permitir comunicação segura com o backend hospedado -->
+  <!-- ✅ Permitir comunicacao segura com o backend hospedado -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -65,7 +65,7 @@
 
 <body class="pagina--painel">
   <header>
-    <h1>NeoRastro — Meus Veículos</h1>
+    <h1>NeoRastro - Meus Veiculos</h1>
     <div>
       <span id="bem-vindo"></span>
       <button id="botao-sair" type="button">Sair</button>
@@ -73,14 +73,14 @@
   </header>
 
   <main>
-    <!-- Formulário de cadastro de veículo -->
+    <!-- Formulario de cadastro de veiculo -->
     <section class="secao-formulario cartao-escuro" aria-labelledby="titulo-cadastro-veiculo">
-      <h2 id="titulo-cadastro-veiculo">Cadastrar novo veículo</h2>
+      <h2 id="titulo-cadastro-veiculo">Cadastrar novo veiculo</h2>
       <div id="mensagem-veiculo" class="mensagem" role="status" aria-live="polite"></div>
 
       <form id="formulario-veiculo" novalidate>
-        <label class="so-leitor" for="campo-nome-veiculo">Nome do veículo</label>
-        <input id="campo-nome-veiculo" type="text" placeholder="Nome do veículo" required />
+        <label class="so-leitor" for="campo-nome-veiculo">Nome do veiculo</label>
+        <input id="campo-nome-veiculo" type="text" placeholder="Nome do veiculo" required />
 
         <label class="so-leitor" for="campo-imei-veiculo">IMEI do rastreador</label>
         <input id="campo-imei-veiculo" type="text" placeholder="IMEI do rastreador" required />
@@ -89,9 +89,9 @@
       </form>
     </section>
 
-    <!-- Lista de veículos -->
+    <!-- Lista de veiculos -->
     <section aria-labelledby="titulo-lista-veiculos">
-      <h2 id="titulo-lista-veiculos">Lista de veículos</h2>
+      <h2 id="titulo-lista-veiculos">Lista de veiculos</h2>
       <div id="lista-veiculos" class="lista-veiculos"></div>
     </section>
   </main>
@@ -100,6 +100,5 @@
   <script src="meus_veiculos.js" defer></script>
 </body>
 </html>
-
 
 
