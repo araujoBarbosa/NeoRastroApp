@@ -58,7 +58,7 @@ function iniciar() {
       });
 
       if (!resposta.ok) {
-        let mensagemErro = "❌ Credenciais inválidas ou falha de rede.";
+        let mensagemErro = "❌ Credenciais invalidas ou falha de rede.";
         try {
           const err = await resposta.json();
           if (err && (err.mensagem || err.erro)) mensagemErro = err.mensagem || err.erro;
@@ -68,7 +68,7 @@ function iniciar() {
 
       const json = await resposta.json();
 
-      // ✅ Salva o token e o usuário (para o painel reconhecer)
+      // ✅ Salva o token e o usuario (para o painel reconhecer)
       localStorage.setItem("token", json.token || "");
       sessionStorage.setItem("token", json.token || "");
       sessionStorage.setItem("usuarioLogado", JSON.stringify(json.usuario || {}));
@@ -76,13 +76,13 @@ function iniciar() {
       mensagem.textContent = "✅ Login realizado! Redirecionando…";
       mensagem.classList.add("sucesso");
 
-      // Redireciona após login bem-sucedido
+      // Redireciona apos login bem-sucedido
       setTimeout(() => {
         window.location.href = "painel.html";
       }, 800);
 
     } catch (erro) {
-      mensagem.textContent = erro?.message || "❌ Não foi possível entrar. Tente novamente.";
+      mensagem.textContent = erro?.message || "❌ Nao foi possivel entrar. Tente novamente.";
       mensagem.classList.add("erro");
       botao.disabled = false;
       botao.textContent = botao.dataset.label || "Entrar";
@@ -94,6 +94,7 @@ function iniciar() {
 }
 
 document.addEventListener("DOMContentLoaded", iniciar);
+
 
 
 
