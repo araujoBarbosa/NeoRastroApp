@@ -1,8 +1,9 @@
 "use strict";
 
-const API_BASE = "https://api.neorastro.cloud"; // ✅ API da VPS
+/* 🔗 URL base da API (backend hospedado na VPS) */
+const API_BASE = "https://api.neorastro.cloud";
 
-// Alternar visibilidade da senha
+/* ===== Alternar visibilidade da senha ===== */
 function ligarAlternarSenha() {
   const botao = document.querySelector(".botao-alternar-senha");
   if (!botao) return;
@@ -18,12 +19,15 @@ function ligarAlternarSenha() {
   });
 }
 
+/* ===== Função principal ===== */
 function iniciar() {
   const formulario = document.getElementById("formulario-entrada");
   const botao = document.getElementById("botao-entrar");
   const mensagem = document.getElementById("mensagem-login");
   const email = document.getElementById("campo-email");
   const senha = document.getElementById("campo-senha");
+
+  if (!formulario || !botao) return;
 
   const atualizarBotao = () => {
     botao.disabled = !(formulario.checkValidity() && email.value && senha.value);
@@ -39,12 +43,12 @@ function iniciar() {
     try {
       botao.disabled = true;
       botao.dataset.label = botao.textContent;
-      botao.textContent = "Entrando…";
+      botao.textContent = "Entrando...";
 
       const dados = {
         email: email.value.trim(),
         senha: senha.value,
-        lembrar: document.getElementById("campo-lembrar").checked,
+        lembrar: document.getElementById("campo-lembrar")?.checked || false,
       };
 
       const resposta = await fetch(`${API_BASE}/login`, {
@@ -57,32 +61,31 @@ function iniciar() {
         mode: "cors",
       });
 
+      const json = await resposta.json().catch(() => ({}));
+
       if (!resposta.ok) {
-        let mensagemErro = "❌ Credenciais invalidas ou falha de rede.";
-        try {
-          const err = await resposta.json();
-          if (err && (err.mensagem || err.erro)) mensagemErro = err.mensagem || err.erro;
-        } catch (_) {}
-        throw new Error(mensagemErro);
+        const msgErro = json.erro || json.mensagem || "❌ Credenciais invalidas.";
+        throw new Error(msgErro);
       }
 
-      const json = await resposta.json();
+      // ✅ Salvar dados do usuario
+      const usuario = json.usuario || { email: dados.email };
+      const token = json.token || "login_local";
 
-      // ✅ Salva o token e o usuario (para o painel reconhecer)
-      localStorage.setItem("token", json.token || "");
-      sessionStorage.setItem("token", json.token || "");
-      sessionStorage.setItem("usuarioLogado", JSON.stringify(json.usuario || {}));
+      // Garante que o painel reconheça o login
+      localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("usuarioLogado", JSON.stringify(usuario));
 
-      mensagem.textContent = "✅ Login realizado! Redirecionando…";
+      mensagem.textContent = "✅ Login realizado! Redirecionando...";
       mensagem.classList.add("sucesso");
 
-      // Redireciona apos login bem-sucedido
       setTimeout(() => {
         window.location.href = "painel.html";
-      }, 800);
-
+      }, 1000);
     } catch (erro) {
-      mensagem.textContent = erro?.message || "❌ Nao foi possivel entrar. Tente novamente.";
+      console.error("Erro no login:", erro);
+      mensagem.textContent = erro.message || "❌ Falha ao entrar. Tente novamente.";
       mensagem.classList.add("erro");
       botao.disabled = false;
       botao.textContent = botao.dataset.label || "Entrar";
@@ -94,6 +97,7 @@ function iniciar() {
 }
 
 document.addEventListener("DOMContentLoaded", iniciar);
+
 
 
 
