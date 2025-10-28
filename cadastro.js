@@ -1,26 +1,23 @@
 "use strict";
 
-/* 🔗 URL base da API (backend hospedado na VPS) */
+/* URL base da API (backend hospedado na VPS) */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Alternar visibilidade da senha ===== */
+/* Alternar visibilidade da senha */
 function alternarVisibilidade(idDoCampo, botao) {
   try {
     const campo = document.getElementById(idDoCampo);
     if (!campo) return;
 
-    // ✅ Armazena o valor atual da senha para evitar duplicação
     const valorAtual = campo.value;
-    const estaVisivel = campo.type === "text";
-    campo.type = estaVisivel ? "password" : "text";
-
-    // ✅ Restaura o valor sem perder ou duplicar caracteres
+    const visivel = campo.type === "text";
+    campo.type = visivel ? "password" : "text";
     campo.value = valorAtual;
 
     if (botao) {
-      botao.textContent = estaVisivel ? "👁️" : "🙈";
-      botao.setAttribute("aria-pressed", String(!estaVisivel));
-      botao.setAttribute("aria-label", estaVisivel ? "Mostrar senha" : "Ocultar senha");
+      botao.textContent = visivel ? "👁️" : "🙈";
+      botao.setAttribute("aria-pressed", String(!visivel));
+      botao.setAttribute("aria-label", visivel ? "Mostrar senha" : "Ocultar senha");
     }
   } catch (erro) {
     console.error("Erro ao alternar visibilidade:", erro);
@@ -30,12 +27,12 @@ function alternarVisibilidade(idDoCampo, botao) {
 (function () {
   "use strict";
 
-  // ===== Exibir mensagens =====
-  function mostrarMensagem(elemento, texto, ehErro) {
+  /* Exibir mensagens */
+  function mostrarMensagem(elemento, texto, erro) {
     if (!elemento) return;
     elemento.textContent = texto;
     elemento.classList.remove("erro", "sucesso");
-    elemento.classList.add(ehErro ? "erro" : "sucesso");
+    elemento.classList.add(erro ? "erro" : "sucesso");
   }
 
   function limparMensagem(elemento) {
@@ -44,90 +41,92 @@ function alternarVisibilidade(idDoCampo, botao) {
     elemento.classList.remove("erro", "sucesso");
   }
 
-  // ===== Configurar formulario =====
+  /* Configurar formulario */
   function ligarFormulario() {
-    const formulario = document.getElementById("formulario-cadastro");
-    if (!formulario) return;
+    const form = document.getElementById("formulario-cadastro");
+    if (!form) return;
 
-    const campoNome = document.getElementById("campo-nome");
-    const campoEmail = document.getElementById("campo-email");
-    const campoTelefone = document.getElementById("campo-telefone");
-    const campoEmpresa = document.getElementById("campo-empresa");
-    const campoSenha = document.getElementById("campo-senha");
-    const campoConfirmar = document.getElementById("campo-confirmar");
+    const nome = document.getElementById("campo-nome");
+    const email = document.getElementById("campo-email");
+    const telefone = document.getElementById("campo-telefone");
+    const empresa = document.getElementById("campo-empresa");
+    const senha = document.getElementById("campo-senha");
+    const confirmar = document.getElementById("campo-confirmar");
     const mensagem = document.getElementById("mensagem-cadastro");
-    const botaoCadastro = document.getElementById("botao-cadastro");
+    const botao = document.getElementById("botao-cadastro");
+    const aceite = document.getElementById("campo-aceite");
 
-    // Ativar botao somente quando checkbox for marcado
-    const campoAceite = document.getElementById("campo-aceite");
-    if (campoAceite && botaoCadastro) {
-      campoAceite.addEventListener("change", () => {
-        botaoCadastro.disabled = !campoAceite.checked;
+    /* Habilitar o botao apenas se o aceite estiver marcado */
+    if (aceite && botao) {
+      aceite.addEventListener("change", () => {
+        botao.disabled = !aceite.checked;
       });
     }
 
-    formulario.addEventListener("submit", async (evento) => {
-      evento.preventDefault();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
       limparMensagem(mensagem);
 
-      const nome = campoNome.value.trim();
-      const email = campoEmail.value.trim();
-      const telefone = campoTelefone.value.trim();
-      const empresa = campoEmpresa.value.trim();
-      const senha = campoSenha.value;
-      const confirmarSenha = campoConfirmar.value;
+      const vNome = nome.value.trim();
+      const vEmail = email.value.trim();
+      const vTelefone = telefone.value.trim();
+      const vEmpresa = empresa.value.trim();
+      const vSenha = senha.value;
+      const vConfirmar = confirmar.value;
 
-      if (!nome || !email || !telefone || !senha || !confirmarSenha) {
-        mostrarMensagem(mensagem, "⚠️ Preencha todos os campos obrigatorios.", true);
+      if (!vNome || !vEmail || !vTelefone || !vSenha || !vConfirmar) {
+        mostrarMensagem(mensagem, "Preencha todos os campos obrigatorios.", true);
         return;
       }
-      if (senha !== confirmarSenha) {
-        mostrarMensagem(mensagem, "⚠️ As senhas nao coincidem.", true);
+      if (vSenha !== vConfirmar) {
+        mostrarMensagem(mensagem, "As senhas nao coincidem.", true);
         return;
       }
 
-      botaoCadastro.disabled = true;
-      botaoCadastro.textContent = "Criando conta...";
+      botao.disabled = true;
+      botao.textContent = "Criando conta...";
 
       try {
-        // ✅ Comunicacao segura com backend Flask (rota correta: /cadastro)
         const resposta = await fetch(`${API_BASE}/cadastro`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "cors",
-          body: JSON.stringify({ nome, email, telefone, empresa, senha }),
+          body: JSON.stringify({
+            nome: vNome,
+            email: vEmail,
+            telefone: vTelefone,
+            empresa: vEmpresa,
+            senha: vSenha,
+          }),
         });
 
         const dados = await resposta.json().catch(() => ({}));
 
         if (resposta.ok) {
-          mostrarMensagem(
-            mensagem,
-            "✅ Cadastro realizado com sucesso! Redirecionando...",
-            false
-          );
+          mostrarMensagem(mensagem, "Cadastro realizado com sucesso! Redirecionando...", false);
           setTimeout(() => (window.location.href = "login.html"), 1500);
         } else {
-          const erro = dados.erro || dados.message || "❌ Erro ao cadastrar. Tente novamente.";
+          const erro = dados.erro || dados.message || "Erro ao cadastrar. Tente novamente.";
           mostrarMensagem(mensagem, erro, true);
         }
       } catch (erro) {
         console.error("Erro de conexao:", erro);
-        mostrarMensagem(mensagem, "❌ Falha na comunicacao com o servidor.", true);
+        mostrarMensagem(mensagem, "Falha na comunicacao com o servidor.", true);
       } finally {
-        botaoCadastro.disabled = false;
-        botaoCadastro.textContent = "Criar conta";
+        botao.disabled = false;
+        botao.textContent = "Criar conta";
       }
     });
   }
 
-  // ===== Inicializacao =====
+  /* Inicializacao */
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", ligarFormulario, { once: true });
   } else {
     ligarFormulario();
   }
 })();
+
 
 
 
