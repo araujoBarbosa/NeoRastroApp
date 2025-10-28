@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0ea5e9" />
   <title>NeoRastro - Cadastro</title>
 
-  <!-- ✅ Seguranca e comunicacao com backend HTTPS -->
+  <!-- Seguranca e comunicacao com backend HTTPS -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -15,9 +15,8 @@
     script-src 'self' 'unsafe-inline';
     connect-src 'self' https://api.neorastro.cloud;
     base-uri 'self';
-    form-action https://api.neorastro.cloud;
+    form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
   ">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
@@ -81,7 +80,7 @@
         <h2 id="titulo-cadastro">Crie sua conta</h2>
         <div id="mensagem-cadastro" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Formulario com rota corrigida -->
+        <!-- Formulario -->
         <form id="formulario-cadastro" method="post" action="https://api.neorastro.cloud/cadastrar" autocomplete="on" novalidate>
           
           <label class="so-leitor" for="campo-nome">Nome completo</label>
@@ -97,7 +96,7 @@
                      autocomplete="tel" inputmode="tel"
                      pattern="^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$"
                      aria-describedby="erro-telefone" />
-              <div id="erro-telefone" class="erro-campo" hidden>Use um formato como (11) 91234-5678.</div>
+              <div id="erro-telefone" class="erro-campo" hidden>Use formato como (11) 91234-5678.</div>
             </div>
             <div>
               <label class="so-leitor" for="campo-empresa">Empresa</label>
@@ -140,10 +139,11 @@
     </div>
   </noscript>
 
-  <!-- ✅ JS separado -->
+  <!-- JS separado -->
   <script defer src="cadastro.js"></script>
 </body>
 </html>
+
 
 
 
