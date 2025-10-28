@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#1d4ed8" />
   <title>NeoRastro - Login</title>
 
-  <!-- ✅ CSS principal -->
+  <!-- CSS principal -->
   <link rel="stylesheet" href="estilo.css" />
 
-  <!-- ✅ Permitir comunicacao segura com a API da VPS -->
+  <!-- Politica de seguranca e comunicacao com a API -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data:;
     img-src 'self' data:;
@@ -20,7 +20,6 @@
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
   ">
 
   <style>
@@ -56,6 +55,7 @@
       margin-top: 1rem;
       gap: 1rem;
     }
+
     .lembrar-dispositivo {
       display: flex;
       align-items: center;
@@ -63,11 +63,13 @@
       font-size: .9rem;
       color: #e5e7eb;
     }
+
     .lembrar-dispositivo input[type="checkbox"] {
       width: 16px;
       height: 16px;
       accent-color: #2563eb;
     }
+
     #botao-entrar {
       padding: 0.6rem 1.2rem;
       font-size: 1rem;
@@ -83,11 +85,11 @@
       <section class="secao-formulario cartao-escuro" aria-labelledby="titulo-login">
 
         <h1 class="nome-empresa">NeoRastro</h1>
-        <h2 id="titulo-login" class="titulo-login">Faca seu Login</h2>
+        <h2 id="titulo-login" class="titulo-login">Faca seu login</h2>
 
         <div id="mensagem-login" class="mensagem" role="status" aria-live="polite"></div>
 
-        <!-- ✅ Corrigido: rota direta para o backend -->
+        <!-- Formulario -->
         <form id="formulario-entrada" method="post" action="https://api.neorastro.cloud/login" autocomplete="on" novalidate>
           <label class="so-leitor" for="campo-email">E-mail</label>
           <input id="campo-email" name="email" type="email" placeholder="Seu e-mail"
@@ -127,9 +129,9 @@
   <script>
     "use strict";
 
-    const API_BASE = "https://api.neorastro.cloud"; // ✅ padronizado
+    const API_BASE = "https://api.neorastro.cloud";
 
-    // Alternar visibilidade da senha
+    /* Alternar visibilidade da senha */
     function ligarAlternarSenha() {
       const botao = document.querySelector(".botao-alternar-senha");
       if (!botao) return;
@@ -145,6 +147,7 @@
       });
     }
 
+    /* Inicializar formulario de login */
     function iniciar() {
       const formulario = document.getElementById("formulario-entrada");
       const botao = document.getElementById("botao-entrar");
@@ -166,7 +169,7 @@
         try {
           botao.disabled = true;
           botao.dataset.label = botao.textContent;
-          botao.textContent = "Entrando…";
+          botao.textContent = "Entrando...";
 
           const dados = {
             email: email.value.trim(),
@@ -185,23 +188,23 @@
           });
 
           if (!resposta.ok) {
-            let mensagemErro = "❌ Credenciais invalidas ou falha de rede.";
+            let msgErro = "Credenciais invalidas ou falha de rede.";
             try {
               const err = await resposta.json();
-              if (err && (err.mensagem || err.erro)) mensagemErro = err.mensagem || err.erro;
+              if (err && (err.mensagem || err.erro)) msgErro = err.mensagem || err.erro;
             } catch (_) {}
-            throw new Error(mensagemErro);
+            throw new Error(msgErro);
           }
 
           const json = await resposta.json();
           localStorage.setItem("token", json.token || "");
 
-          mensagem.textContent = "✅ Login realizado! Redirecionando…";
+          mensagem.textContent = "Login realizado com sucesso! Redirecionando...";
           mensagem.classList.add("sucesso");
           setTimeout(() => { window.location.href = "painel.html"; }, 600);
 
         } catch (erro) {
-          mensagem.textContent = erro?.message || "❌ Nao foi possivel entrar. Tente novamente.";
+          mensagem.textContent = erro?.message || "Nao foi possivel entrar. Tente novamente.";
           mensagem.classList.add("erro");
           botao.disabled = false;
           botao.textContent = botao.dataset.label || "Entrar";
@@ -216,7 +219,6 @@
   </script>
 </body>
 </html>
-
 
 
 
