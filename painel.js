@@ -93,11 +93,11 @@ async function enviarComando(id_veiculo, tipo, botao) {
       body: JSON.stringify({ tipo, id_veiculo }),
     });
 
-    mostrarAviso(resposta.mensagem || "Comando enviado!", "success");
+    mostrarAviso(resposta.mensagem || "✅ Comando enviado!", "success");
     listarComandos();
   } catch (e) {
     console.error(e);
-    mostrarAviso("Erro ao enviar comando.", "error");
+    mostrarAviso("❌ Erro ao enviar comando.", "error");
   } finally {
     botao.classList.remove("neo-btn--loading");
     botao.disabled = false;
@@ -164,8 +164,8 @@ async function listarVeiculos() {
     });
   } catch (e) {
     console.error(e);
-    container.innerHTML = `<div class="neo-historico__vazio">Erro ao carregar veiculos.</div>`;
-    mostrarAviso("Falha ao conectar com a API.", "error");
+    container.innerHTML = `<div class="neo-historico__vazio">❌ Erro ao carregar veiculos.</div>`;
+    mostrarAviso("❌ Falha ao conectar com a API.", "error");
   }
 }
 
@@ -197,8 +197,8 @@ async function listarComandos() {
     if (typeof feather !== "undefined") feather.replace();
   } catch (e) {
     console.error(e);
-    lista.innerHTML = `<li class="neo-historico__vazio">Erro ao buscar comandos.</li>`;
-    mostrarAviso("Erro ao carregar historico.", "error");
+    lista.innerHTML = `<li class="neo-historico__vazio">❌ Erro ao buscar comandos.</li>`;
+    mostrarAviso("❌ Erro ao carregar historico.", "error");
   }
 }
 
@@ -217,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
   const token = pegarToken();
 
-  // ✅ Nova logica: aceita login local e usuario salvo
   if ((!usuario || Object.keys(usuario).length === 0) && !token) {
     console.warn("Nenhum usuario logado encontrado, voltando ao login...");
     location.href = "index.html";
@@ -243,6 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof feather !== "undefined") feather.replace();
 });
+
 
 
 
