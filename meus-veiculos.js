@@ -48,7 +48,7 @@
     });
 
     if (resposta.status === 401) {
-      mostrarMensagem("⚠️ Sessao expirada. Faca login novamente.", true);
+      mostrarMensagem("Sessao expirada. Faca login novamente.", true);
       sairSistema();
       throw new Error("Sessao expirada");
     }
@@ -115,26 +115,26 @@
       item.innerHTML = `
         <strong>${v.nome}</strong><br>
         IMEI: ${v.imei}<br>
-        <button class="abrir">🔎 Abrir no painel</button>
-        <button class="remover">🗑️ Remover</button>
+        <button class="abrir">Abrir no painel</button>
+        <button class="remover">Remover</button>
       `;
 
-      // 🔍 Abrir no painel
+      // Abrir no painel
       item.querySelector(".abrir").addEventListener("click", () => {
         sessionStorage.setItem("imeiSelecionado", v.imei);
         location.href = "painel.html";
       });
 
-      // 🗑️ Remover veiculo
+      // Remover veiculo
       item.querySelector(".remover").addEventListener("click", async () => {
         if (confirm(`Deseja realmente remover o veiculo ${v.nome}?`)) {
           try {
             await removerVeiculo(v.id);
-            mostrarMensagem("✅ Veiculo removido com sucesso!");
+            mostrarMensagem("Veiculo removido com sucesso!");
             carregarVeiculos();
           } catch (erro) {
             console.error("Erro ao remover veiculo:", erro);
-            mostrarMensagem("❌ Erro ao remover veiculo.", true);
+            mostrarMensagem("Erro ao remover veiculo.", true);
           }
         }
       });
@@ -149,7 +149,7 @@
       renderizarVeiculos(veiculos);
     } catch (erro) {
       console.error("Erro ao carregar veiculos:", erro);
-      mostrarMensagem("❌ Nao foi possivel carregar os veiculos.", true);
+      mostrarMensagem("Nao foi possivel carregar os veiculos.", true);
     }
   }
 
@@ -165,18 +165,18 @@
       const imei = document.getElementById("campo-imei-veiculo").value.trim();
 
       if (!nome || !imei) {
-        mostrarMensagem("⚠️ Preencha todos os campos.", true);
+        mostrarMensagem("Preencha todos os campos.", true);
         return;
       }
 
       try {
         await cadastrarVeiculo(nome, imei);
         formulario.reset();
-        mostrarMensagem("✅ Veiculo cadastrado com sucesso!");
+        mostrarMensagem("Veiculo cadastrado com sucesso!");
         carregarVeiculos();
       } catch (erro) {
         console.error("Erro ao cadastrar veiculo:", erro);
-        mostrarMensagem("❌ Erro ao cadastrar veiculo.", true);
+        mostrarMensagem("Erro ao cadastrar veiculo.", true);
       }
     });
   }
