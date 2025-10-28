@@ -116,4 +116,7 @@ async function removerUsuario(id) {
 /* Inicializacao */
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
 
+/* Evento do botao sair */
+document.getElementById("botao-sair")?.addEventListener("click", sairAdmin);
+
 
