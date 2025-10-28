@@ -1,9 +1,9 @@
 "use strict";
 
-/* 🔗 URL base da API (backend hospedado na VPS) */
+/* URL base da API (backend hospedado na VPS) */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Alternar visibilidade da senha ===== */
+/* Alternar visibilidade da senha */
 function ligarAlternarSenha() {
   const botao = document.querySelector(".botao-alternar-senha");
   if (!botao) return;
@@ -19,7 +19,7 @@ function ligarAlternarSenha() {
   });
 }
 
-/* ===== Função principal ===== */
+/* Funcao principal */
 function iniciar() {
   const formulario = document.getElementById("formulario-entrada");
   const botao = document.getElementById("botao-entrar");
@@ -64,20 +64,20 @@ function iniciar() {
       const json = await resposta.json().catch(() => ({}));
 
       if (!resposta.ok) {
-        const msgErro = json.erro || json.mensagem || "❌ Credenciais invalidas.";
+        const msgErro = json.erro || json.mensagem || "Credenciais invalidas.";
         throw new Error(msgErro);
       }
 
-      // ✅ Salvar dados do usuario
+      /* Salvar dados do usuario */
       const usuario = json.usuario || { email: dados.email };
       const token = json.token || "login_local";
 
-      // Garante que o painel reconheça o login
+      /* Garante que o painel reconheca o login */
       localStorage.setItem("token", token);
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("usuarioLogado", JSON.stringify(usuario));
 
-      mensagem.textContent = "✅ Login realizado! Redirecionando...";
+      mensagem.textContent = "Login realizado com sucesso! Redirecionando...";
       mensagem.classList.add("sucesso");
 
       setTimeout(() => {
@@ -85,7 +85,7 @@ function iniciar() {
       }, 1000);
     } catch (erro) {
       console.error("Erro no login:", erro);
-      mensagem.textContent = erro.message || "❌ Falha ao entrar. Tente novamente.";
+      mensagem.textContent = erro.message || "Falha ao entrar. Tente novamente.";
       mensagem.classList.add("erro");
       botao.disabled = false;
       botao.textContent = botao.dataset.label || "Entrar";
