@@ -1,52 +1,56 @@
 "use strict";
 
-/* URL base da API (backend hospedado na VPS) */
+/* ====== Config ====== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* Funcoes de sessao */
+/* ====== Sessão ====== */
 function pegarToken() {
-  return sessionStorage.getItem("token");
+  return sessionStorage.getItem("token") || localStorage.getItem("token");
 }
 
 function sairAdmin() {
   sessionStorage.clear();
+  localStorage.clear();
   location.href = "index.html";
 }
 
-/* Funcao generica para chamadas da API com token */
+/* Redireciona se não tiver token */
+document.addEventListener("DOMContentLoaded", () => {
+  if (!pegarToken()) {
+    alert("Sessão expirada. Faça login novamente.");
+    sairAdmin();
+  }
+});
+
+/* ====== Chamada genérica com JWT ====== */
 async function apiAdmin(endpoint, opcoes = {}) {
   const token = pegarToken();
 
-  try {
-    const resposta = await fetch(
-      `${API_BASE}${endpoint.startsWith("/") ? endpoint : "/" + endpoint}`,
-      {
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        ...opcoes,
-      }
-    );
-
-    if (resposta.status === 401) {
-      alert("Sessao expirada. Faca login novamente.");
-      sairAdmin();
-      throw new Error("Sessao expirada");
+  const resp = await fetch(
+    `${API_BASE}${endpoint.startsWith("/") ? endpoint : "/" + endpoint}`,
+    {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      ...opcoes,
     }
+  );
 
-    const dados = await resposta.json().catch(() => ({}));
-    if (!resposta.ok) throw new Error(dados.mensagem || dados.erro || "Erro desconhecido.");
-
-    return dados;
-  } catch (erro) {
-    console.error("Erro na API admin:", erro);
-    throw erro;
+  if (resp.status === 401) {
+    alert("Sessão expirada. Faça login novamente.");
+    sairAdmin();
+    throw new Error("Sessão expirada");
   }
+
+  const dados = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(dados.mensagem || dados.erro || "Erro desconhecido.");
+  return dados;
 }
 
-/* Carregar lista de usuarios */
+/* ====== Renderização ====== */
 async function carregarUsuarios() {
   const corpo = document.getElementById("corpo-tabela");
   corpo.innerHTML = `<tr><td colspan="5" class="mensagem">Carregando...</td></tr>`;
@@ -60,7 +64,7 @@ async function carregarUsuarios() {
     }
 
     corpo.innerHTML = "";
-    usuarios.forEach((u) => {
+    for (const u of usuarios) {
       const linha = document.createElement("tr");
       linha.innerHTML = `
         <td>${u.id}</td>
@@ -72,51 +76,52 @@ async function carregarUsuarios() {
         <td>
           ${
             u.aprovado
-              ? `<button class="btn-remover" onclick="removerUsuario(${u.id})">Remover</button>`
+              ? `<button class="btn-remover" data-acao="remover" data-id="${u.id}">Remover</button>`
               : `
-                <button class="btn-aprovar" onclick="aprovarUsuario(${u.id})">Aprovar</button>
-                <button class="btn-remover" onclick="removerUsuario(${u.id})">Remover</button>
+                <button class="btn-aprovar" data-acao="aprovar" data-id="${u.id}">Aprovar</button>
+                <button class="btn-remover" data-acao="remover" data-id="${u.id}">Remover</button>
               `
           }
         </td>
       `;
       corpo.appendChild(linha);
-    });
+    }
   } catch (e) {
     corpo.innerHTML = `<tr><td colspan="5" class="mensagem">Falha ao carregar usuarios.</td></tr>`;
+    console.error(e);
   }
 }
 
-/* Aprovar usuario */
-async function aprovarUsuario(id) {
-  if (!confirm("Deseja aprovar este usuario?")) return;
+/* Delegação de eventos (um listener só) */
+document.addEventListener("click", async (ev) => {
+  const btn = ev.target.closest("button[data-acao]");
+  if (!btn) return;
+
+  const acao = btn.dataset.acao;
+  const id = Number(btn.dataset.id);
 
   try {
-    const resultado = await apiAdmin(`/admin/aprovar/${id}`, { method: "POST" });
-    alert(resultado.mensagem || "Usuario aprovado com sucesso!");
-    carregarUsuarios();
+    if (acao === "aprovar") {
+      if (!confirm("Deseja aprovar este usuario?")) return;
+      const r = await apiAdmin(`/admin/aprovar/${id}`, { method: "POST" });
+      alert(r.mensagem || "Usuario aprovado com sucesso!");
+    }
+
+    if (acao === "remover") {
+      if (!confirm("Tem certeza que deseja remover este usuario?")) return;
+      const r = await apiAdmin(`/admin/remover/${id}`, { method: "DELETE" });
+      alert(r.mensagem || "Usuario removido com sucesso!");
+    }
+
+    await carregarUsuarios();
   } catch (e) {
-    alert("Erro ao aprovar usuario: " + (e.message || ""));
+    alert(e.message || "Erro na operação.");
   }
-}
+});
 
-/* Remover usuario */
-async function removerUsuario(id) {
-  if (!confirm("Tem certeza que deseja remover este usuario?")) return;
-
-  try {
-    const resultado = await apiAdmin(`/admin/remover/${id}`, { method: "DELETE" });
-    alert(resultado.mensagem || "Usuario removido com sucesso!");
-    carregarUsuarios();
-  } catch (e) {
-    alert("Erro ao remover usuario: " + (e.message || ""));
-  }
-}
-
-/* Inicializacao */
+/* Inicialização e sair */
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
-
-/* Evento do botao sair */
 document.getElementById("botao-sair")?.addEventListener("click", sairAdmin);
+
 
 
