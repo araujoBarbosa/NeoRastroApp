@@ -1,9 +1,9 @@
 "use strict";
 
-/* URL base da API (backend hospedado na VPS) */
+/* ===== Configuração da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* Alternar visibilidade da senha */
+/* ===== Alternar visibilidade da senha ===== */
 function ligarAlternarSenha() {
   const botao = document.querySelector(".botao-alternar-senha");
   if (!botao) return;
@@ -19,7 +19,7 @@ function ligarAlternarSenha() {
   });
 }
 
-/* Funcao principal */
+/* ===== Fluxo principal ===== */
 function iniciar() {
   const formulario = document.getElementById("formulario-entrada");
   const botao = document.getElementById("botao-entrar");
@@ -48,15 +48,11 @@ function iniciar() {
       const dados = {
         email: email.value.trim(),
         senha: senha.value,
-        lembrar: document.getElementById("campo-lembrar")?.checked || false,
       };
 
       const resposta = await fetch(`${API_BASE}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados),
         mode: "cors",
       });
@@ -64,15 +60,14 @@ function iniciar() {
       const json = await resposta.json().catch(() => ({}));
 
       if (!resposta.ok) {
-        const msgErro = json.erro || json.mensagem || "Credenciais invalidas.";
+        const msgErro = json.erro || json.mensagem || "Credenciais inválidas.";
         throw new Error(msgErro);
       }
 
-      /* Salvar dados do usuario */
+      /* ===== Salvar dados do usuário ===== */
       const usuario = json.usuario || { email: dados.email };
-      const token = json.token || "login_local";
+      const token = json.token;
 
-      /* Garante que o painel reconheca o login */
       localStorage.setItem("token", token);
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("usuarioLogado", JSON.stringify(usuario));
@@ -80,9 +75,15 @@ function iniciar() {
       mensagem.textContent = "Login realizado com sucesso! Redirecionando...";
       mensagem.classList.add("sucesso");
 
+      // 🔁 Redireciona para admin.html se for admin
       setTimeout(() => {
-        window.location.href = "painel.html";
+        if (usuario.email.includes("admin")) {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "painel.html";
+        }
       }, 1000);
+
     } catch (erro) {
       console.error("Erro no login:", erro);
       mensagem.textContent = erro.message || "Falha ao entrar. Tente novamente.";
@@ -96,7 +97,9 @@ function iniciar() {
   ligarAlternarSenha();
 }
 
+/* ===== Inicialização ===== */
 document.addEventListener("DOMContentLoaded", iniciar);
+
 
 
 
