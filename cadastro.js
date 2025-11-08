@@ -1,18 +1,16 @@
 "use strict";
 
-/* URL base da API (backend hospedado na VPS) */
+/* ====== URL base da API (backend hospedado na VPS) ====== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* Alternar visibilidade da senha */
+/* ====== Alternar visibilidade da senha ====== */
 function alternarVisibilidade(idDoCampo, botao) {
   try {
     const campo = document.getElementById(idDoCampo);
     if (!campo) return;
 
-    const valorAtual = campo.value;
     const visivel = campo.type === "text";
     campo.type = visivel ? "password" : "text";
-    campo.value = valorAtual;
 
     if (botao) {
       botao.textContent = visivel ? "👁️" : "🙈";
@@ -24,10 +22,11 @@ function alternarVisibilidade(idDoCampo, botao) {
   }
 }
 
+/* ====== Escopo principal ====== */
 (function () {
   "use strict";
 
-  /* Exibir mensagens */
+  /* ====== Exibir mensagens ====== */
   function mostrarMensagem(elemento, texto, erro) {
     if (!elemento) return;
     elemento.textContent = texto;
@@ -41,7 +40,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     elemento.classList.remove("erro", "sucesso");
   }
 
-  /* Configurar formulario */
+  /* ====== Configurar formulário ====== */
   function ligarFormulario() {
     const form = document.getElementById("formulario-cadastro");
     if (!form) return;
@@ -56,7 +55,7 @@ function alternarVisibilidade(idDoCampo, botao) {
     const botao = document.getElementById("botao-cadastro");
     const aceite = document.getElementById("campo-aceite");
 
-    /* Habilitar o botao apenas se o aceite estiver marcado */
+    /* Ativar botão apenas se o aceite estiver marcado */
     if (aceite && botao) {
       aceite.addEventListener("change", () => {
         botao.disabled = !aceite.checked;
@@ -75,11 +74,12 @@ function alternarVisibilidade(idDoCampo, botao) {
       const vConfirmar = confirmar.value;
 
       if (!vNome || !vEmail || !vTelefone || !vSenha || !vConfirmar) {
-        mostrarMensagem(mensagem, "Preencha todos os campos obrigatorios.", true);
+        mostrarMensagem(mensagem, "Preencha todos os campos obrigatórios.", true);
         return;
       }
+
       if (vSenha !== vConfirmar) {
-        mostrarMensagem(mensagem, "As senhas nao coincidem.", true);
+        mostrarMensagem(mensagem, "As senhas não coincidem.", true);
         return;
       }
 
@@ -89,29 +89,39 @@ function alternarVisibilidade(idDoCampo, botao) {
       try {
         const resposta = await fetch(`${API_BASE}/cadastro`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
           mode: "cors",
           body: JSON.stringify({
             nome: vNome,
             email: vEmail,
             telefone: vTelefone,
             empresa: vEmpresa,
-            senha: vSenha,
+            senha: vSenha
           }),
         });
 
-        const dados = await resposta.json().catch(() => ({}));
+        // Garante compatibilidade caso o backend retorne algo diferente
+        let dados = {};
+        try {
+          dados = await resposta.json();
+        } catch {
+          dados = {};
+        }
 
         if (resposta.ok) {
-          mostrarMensagem(mensagem, "Cadastro realizado com sucesso! Redirecionando...", false);
+          mostrarMensagem(mensagem, "✅ Cadastro realizado com sucesso! Redirecionando...", false);
           setTimeout(() => (window.location.href = "login.html"), 1500);
         } else {
-          const erro = dados.erro || dados.message || "Erro ao cadastrar. Tente novamente.";
+          const erro = dados.erro || dados.mensagem || dados.message || "Erro ao cadastrar. Tente novamente.";
           mostrarMensagem(mensagem, erro, true);
         }
+
       } catch (erro) {
-        console.error("Erro de conexao:", erro);
-        mostrarMensagem(mensagem, "Falha na comunicacao com o servidor.", true);
+        console.error("Erro de comunicação com o servidor:", erro);
+        mostrarMensagem(mensagem, "⚠️ Falha na comunicação com o servidor. Verifique sua conexão e tente novamente.", true);
       } finally {
         botao.disabled = false;
         botao.textContent = "Criar conta";
@@ -119,13 +129,14 @@ function alternarVisibilidade(idDoCampo, botao) {
     });
   }
 
-  /* Inicializacao */
+  /* ====== Inicialização ====== */
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", ligarFormulario, { once: true });
   } else {
     ligarFormulario();
   }
 })();
+
 
 
 
