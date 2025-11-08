@@ -68,7 +68,9 @@ function iniciar() {
       const usuario = json.usuario || { email: dados.email };
       const token = json.token;
 
+      // 💾 Agora salva tanto em session quanto em localStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("usuarioLogado", JSON.stringify(usuario));
 
@@ -99,6 +101,8 @@ function iniciar() {
 
 /* ===== Inicialização ===== */
 document.addEventListener("DOMContentLoaded", iniciar);
+
+
 
 
 
