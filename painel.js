@@ -8,16 +8,35 @@ function pegarUsuario() {
   try {
     const userSession = sessionStorage.getItem("usuarioLogado");
     const userLocal = localStorage.getItem("usuarioLogado");
-    return userSession ? JSON.parse(userSession) : userLocal ? JSON.parse(userLocal) : null;
-  } catch {
+
+    const bruto = userSession || userLocal;
+    if (!bruto) return null;
+
+    const usuario = JSON.parse(bruto);
+    if (!usuario || typeof usuario !== "object") return null;
+
+    return usuario;
+  } catch (e) {
+    console.error("Erro ao ler usuarioLogado do storage:", e);
+    // Se tiver dado corrompido, limpamos para nao ficar em loop
+    sessionStorage.removeItem("usuarioLogado");
+    localStorage.removeItem("usuarioLogado");
     return null;
   }
 }
 
 function pegarToken() {
-  const tokenSession = sessionStorage.getItem("token");
-  const tokenLocal = localStorage.getItem("token");
-  return tokenSession || tokenLocal || null;
+  try {
+    const tokenSession = sessionStorage.getItem("token");
+    const tokenLocal = localStorage.getItem("token");
+    const token = tokenSession || tokenLocal || null;
+    return token || null;
+  } catch (e) {
+    console.error("Erro ao ler token do storage:", e);
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("token");
+    return null;
+  }
 }
 
 function sairSistema() {
@@ -59,11 +78,14 @@ async function api(caminho, opcoes = {}) {
       ...opcoes,
     });
 
-    // Se o token for local (simulado), ignora 401
-    if (resposta.status === 401 && token !== "login_local") {
-      mostrarAviso("⚠️ Sessao expirada. Faca login novamente.", "error");
-      sairSistema();
-      throw new Error("Sessao expirada");
+    // Se vier 401, so derruba a sessao se REALMENTE existir token salvo
+    if (resposta.status === 401) {
+      const tokenAtual = pegarToken();
+      if (tokenAtual && tokenAtual !== "login_local") {
+        mostrarAviso("⚠️ Sessao expirada. Faca login novamente.", "error");
+        sairSistema();
+        throw new Error("Sessao expirada");
+      }
     }
 
     const dados = await resposta.json().catch(() => ({}));
@@ -157,9 +179,10 @@ async function listarVeiculos() {
 
     container.querySelectorAll("button[data-tipo]").forEach((botao) => {
       botao.addEventListener("click", async (e) => {
-        const tipo = e.target.closest("button").dataset.tipo;
-        const id = e.target.closest("button").dataset.id;
-        await enviarComando(id, tipo, e.target.closest("button"));
+        const botaoReal = e.target.closest("button");
+        const tipo = botaoReal.dataset.tipo;
+        const id = botaoReal.dataset.id;
+        await enviarComando(id, tipo, botaoReal);
       });
     });
   } catch (e) {
@@ -217,7 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
   const token = pegarToken();
 
-  if ((!usuario || Object.keys(usuario).length === 0) && !token) {
+  // So bloqueia acesso se NAO tiver usuario E NAO tiver token
+  if (!usuario && !token) {
     console.warn("Nenhum usuario logado encontrado, voltando ao login...");
     location.href = "index.html";
     return;
@@ -242,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof feather !== "undefined") feather.replace();
 });
+
 
 
 
