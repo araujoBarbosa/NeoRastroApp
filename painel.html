@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#4c1d95" />
   <title>NeoRastro - Painel</title>
 
   <!-- Politica de seguranca -->
@@ -25,102 +25,612 @@
 
   <style>
     :root {
-      --neo-primary: #3b82f6;
-      --neo-primary-dark: #1d4ed8;
-      --neo-primary-light: #60a5fa;
-      --neo-success: #10b981;
-      --neo-danger: #ef4444;
-      --neo-bg-primary: #0f172a;
-      --neo-bg-secondary: #1e293b;
-      --neo-border: #475569;
-      --neo-text-primary: #f8fafc;
-      --neo-text-secondary: #cbd5e1;
-      --radius: 10px;
-      --transition: all .3s ease;
-      --neo-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      --neo-roxo: #8b5cf6;
+      --neo-roxo-escuro: #4c1d95;
+      --neo-roxo-neon: #a855f7;
+      --neo-azul-neon: #38bdf8;
+      --neo-sucesso: #22c55e;
+      --neo-perigo: #ef4444;
+
+      --neo-fundo: #020617;
+      --neo-fundo-painel: rgba(15, 23, 42, 0.92);
+      --neo-fundo-painel-soft: rgba(15, 23, 42, 0.82);
+      --neo-borda: rgba(148, 163, 184, 0.5);
+      --neo-texto-principal: #f9fafb;
+      --neo-texto-secundario: #cbd5e1;
+      --neo-radius-grande: 18px;
+      --neo-radius: 12px;
+      --neo-sombra-forte: 0 24px 60px rgba(15, 23, 42, 0.9);
+      --neo-sombra-suave: 0 18px 40px rgba(15, 23, 42, 0.7);
+      --neo-transicao: all .25s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body.pagina--painel {
       margin: 0;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--neo-bg-primary);
-      color: var(--neo-text-primary);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--neo-texto-principal);
+      background:
+        radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.3), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.25), transparent 55%),
+        radial-gradient(circle at 0 100%, rgba(79, 70, 229, 0.25), transparent 55%),
+        var(--neo-fundo);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+
+    /* HEADER */
 
     header.painel-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 22px;
-      background: linear-gradient(135deg,#1e293b,#334155);
-      border-bottom: 1px solid var(--neo-border);
-      position: sticky; top: 0; z-index: 10;
-      box-shadow: var(--neo-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 22px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.95);
+      background:
+        radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.35), transparent 60%),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.85);
+      z-index: 30;
     }
 
-    .painel-header__marca { display:flex; align-items:center; gap:10px; }
+    .painel-header__marca {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .painel-header__logo-wrap {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 30% 0, #f9fafb, #1e293b);
+      box-shadow:
+        0 0 0 1px rgba(216, 180, 254, 0.6),
+        0 0 28px rgba(168, 85, 247, 0.9);
+    }
+
+    .painel-header__logo-glow {
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(168, 85, 247, 0.25),
+        rgba(56, 189, 248, 0.3),
+        rgba(34, 197, 94, 0.2),
+        rgba(168, 85, 247, 0.25)
+      );
+      mix-blend-mode: screen;
+      opacity: 0.85;
+      animation: girar-glow 10s linear infinite;
+    }
+
+    .painel-header__logo-inner {
+      position: relative;
+      border-radius: inherit;
+      padding: 4px;
+      background: radial-gradient(circle at 30% 0, #0f172a, #111827);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .painel-header__logo-inner img {
+      width: 22px;
+      height: 22px;
+      display: block;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.8));
+    }
+
     .painel-header__titulo {
-      font-size:1.25rem; font-weight:700;
-      background:linear-gradient(135deg,#fff,var(--neo-primary-light));
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    .painel-header__acoes { display:flex; align-items:center; gap:10px; }
-    .painel-header__bem-vindo { color:var(--neo-text-secondary); font-weight:500; }
+    .painel-header__titulo-texto {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: linear-gradient(120deg, #f9fafb, #a855f7, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .painel-header__subtitulo {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: rgba(209, 213, 219, 0.7);
+    }
+
+    .painel-header__acoes {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .painel-header__bem-vindo {
+      color: var(--neo-texto-secundario);
+      font-weight: 500;
+      font-size: .9rem;
+    }
+
+    /* BOTÕES */
+
+    button.neo-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--neo-transicao);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .85rem;
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      color: var(--neo-texto-principal);
+    }
+
+    .neo-btn--primary {
+      background: radial-gradient(circle at 0 0, var(--neo-roxo-neon), var(--neo-roxo-escuro));
+      box-shadow:
+        0 0 0 1px rgba(216, 180, 254, 0.7),
+        0 12px 35px rgba(147, 51, 234, 0.75);
+      color: #f9fafb;
+    }
+
+    .neo-btn--primary::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.16), transparent);
+      opacity: 0;
+      transition: var(--neo-transicao);
+    }
+
+    .neo-btn--primary:hover::before {
+      opacity: 1;
+    }
+
+    .neo-btn--secondary {
+      background: rgba(15, 23, 42, 0.9);
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
+      color: var(--neo-texto-principal);
+    }
+
+    .neo-btn--danger {
+      background: rgba(239, 68, 68, 0.14);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.7);
+      color: #fee2e2;
+      border-radius: var(--neo-radius);
+    }
+
+    .neo-btn--success {
+      background: rgba(22, 163, 74, 0.14);
+      box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.7);
+      color: #bbf7d0;
+      border-radius: var(--neo-radius);
+    }
+
+    .neo-btn--primary:hover {
+      transform: translateY(-1px) scale(1.01);
+    }
+
+    .neo-btn--secondary:hover {
+      background: rgba(15, 23, 42, 0.98);
+      transform: translateY(-1px);
+    }
+
+    .neo-btn--loading::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(15, 23, 42, 0.35);
+      border-top-color: #f9fafb;
+      animation: girar 0.6s linear infinite;
+    }
+
+    @keyframes girar {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes girar-glow {
+      to { transform: rotate(360deg); }
+    }
+
+    /* LAYOUT PRINCIPAL */
 
     main.painel-main {
-      display:grid; grid-template-columns:360px 1fr; gap:20px;
-      padding:20px; height:calc(100vh - 80px);
+      position: relative;
+      flex: 1;
+      height: calc(100vh - 60px);
+      overflow: hidden;
     }
 
     #mapa-rastreamento {
-      height:100%; width:100%;
-      border-radius:var(--radius);
-      box-shadow:var(--neo-shadow);
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      z-index: 1;
     }
+
+    /* PAINEL LATERAL FLUTUANTE */
 
     .painel-lateral {
-      background:var(--neo-bg-secondary);
-      border-radius:var(--radius);
-      padding:20px;
-      border:1px solid var(--neo-border);
-      box-shadow:var(--neo-shadow);
-      overflow-y:auto;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      bottom: 16px;
+      width: 360px;
+      max-width: calc(100% - 32px);
+      border-radius: var(--neo-radius-grande);
+      background:
+        radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.35), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.3), transparent 55%),
+        var(--neo-fundo-painel);
+      border: 1px solid var(--neo-borda);
+      box-shadow: var(--neo-sombra-forte);
+      padding: 16px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+      z-index: 5;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      animation: entrar-painel 0.5s ease-out;
     }
+
+    @keyframes entrar-painel {
+      from {
+        opacity: 0;
+        transform: translateX(20px) translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+      }
+    }
+
+    .painel-lateral h2 {
+      margin: 0;
+      font-size: .95rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--neo-texto-secundario);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .painel-lateral h3 {
+      margin: 10px 0 4px;
+      font-size: .86rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--neo-texto-secundario);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .painel-lateral__topo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .painel-lateral__etiqueta {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(209, 213, 219, 0.85);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .painel-lateral__conteudo {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .neo-card {
+      background: var(--neo-fundo-painel-soft);
+      border-radius: var(--neo-radius);
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      box-shadow: var(--neo-sombra-suave);
+      padding: 10px 10px 8px;
+    }
+
+    .neo-card__cabecalho {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .neo-card__titulo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .9rem;
+    }
+
+    .neo-card__subtitulo {
+      font-size: .76rem;
+      color: var(--neo-texto-secundario);
+      margin-top: 2px;
+    }
+
+    /* LISTA DE VEÍCULOS */
+
+    #lista-veiculos {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .neo-veiculo {
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.97),
+        rgba(24, 24, 37, 0.95)
+      );
+      border-radius: 12px;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      padding: 8px 9px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--neo-transicao);
+    }
+
+    .neo-veiculo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.2), transparent 55%);
+      opacity: 0;
+      transition: var(--neo-transicao);
+      pointer-events: none;
+    }
+
+    .neo-veiculo:hover {
+      transform: translateY(-1px) translateX(1px);
+      border-color: rgba(192, 132, 252, 0.9);
+      box-shadow: 0 16px 45px rgba(15, 23, 42, 0.95);
+    }
+
+    .neo-veiculo:hover::before {
+      opacity: 1;
+    }
+
+    .neo-veiculo__info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .neo-veiculo__modelo {
+      font-size: .9rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .neo-veiculo__detalhe {
+      font-size: .76rem;
+      color: var(--neo-texto-secundario);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .neo-veiculo__detalhe i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .neo-veiculo__acoes {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .neo-veiculo__status {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .neo-veiculo__status--ativo {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(74, 222, 128, 0.9);
+      color: #bbf7d0;
+    }
+
+    .neo-veiculo__status--inativo {
+      background: rgba(248, 113, 113, 0.16);
+      border-color: rgba(248, 113, 113, 0.9);
+      color: #fecaca;
+    }
+
+    .neo-veiculo__status--desconhecido {
+      background: rgba(148, 163, 184, 0.18);
+      border-color: rgba(148, 163, 184, 0.9);
+      color: #e5e7eb;
+    }
+
+    /* HISTÓRICO */
+
+    .neo-historico__lista {
+      list-style: none;
+      margin: 8px 0 10px;
+      padding: 0;
+      max-height: 130px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .neo-historico__item {
+      font-size: .78rem;
+      color: var(--neo-texto-secundario);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(51, 65, 85, 0.95);
+    }
+
+    .neo-historico__vazio {
+      font-size: .8rem;
+      padding: 8px;
+      text-align: center;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px dashed rgba(75, 85, 99, 0.9);
+      color: var(--neo-texto-secundario);
+    }
+
+    .neo-loading {
+      font-size: .8rem;
+      text-align: center;
+      color: var(--neo-texto-secundario);
+    }
+
+    /* TOAST DE AVISO */
 
     #mensagem-aviso {
-      position:fixed; bottom:20px; right:20px;
-      padding:12px 18px; border-radius:var(--radius);
-      font-weight:600; color:#fff; display:none; z-index:2000;
-      box-shadow:var(--neo-shadow);
-      -webkit-backdrop-filter:blur(10px);
-      backdrop-filter:blur(10px);
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 500;
+      color: #f9fafb;
+      display: none;
+      z-index: 2000;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: .82rem;
     }
 
-    .neo-toast--info { background:linear-gradient(135deg,#3b82f6,#1e40af); }
-    .neo-toast--success { background:linear-gradient(135deg,#10b981,#059669); }
-    .neo-toast--error { background:linear-gradient(135deg,#ef4444,#b91c1c); }
-
-    button.neo-btn {
-      padding:8px 14px;
-      border:none; border-radius:8px;
-      font-weight:600; cursor:pointer;
-      transition:var(--transition);
+    .neo-toast--info {
+      background: radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.8), rgba(15, 23, 42, 0.96));
     }
-    .neo-btn--primary { background:var(--neo-primary); color:#fff; }
-    .neo-btn--secondary { background:var(--neo-border); color:#fff; }
-    .neo-btn--primary:hover { background:var(--neo-primary-dark); }
+
+    .neo-toast--success {
+      background: radial-gradient(circle at 0 0, rgba(22, 163, 74, 0.8), rgba(15, 23, 42, 0.96));
+    }
+
+    .neo-toast--error {
+      background: radial-gradient(circle at 0 0, rgba(248, 113, 113, 0.85), rgba(15, 23, 42, 0.96));
+    }
+
+    /* RESPONSIVO */
+
+    @media (max-width: 900px) {
+      main.painel-main {
+        height: auto;
+        min-height: calc(100vh - 60px);
+      }
+
+      #mapa-rastreamento {
+        position: relative;
+        height: 320px;
+      }
+
+      .painel-lateral {
+        position: relative;
+        width: auto;
+        max-width: none;
+        right: auto;
+        left: auto;
+        top: 0;
+        bottom: 0;
+        margin: 10px 12px 16px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header.painel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .painel-header__acoes {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
   </style>
 </head>
 
 <body class="pagina--painel">
   <header class="painel-header">
     <div class="painel-header__marca">
-      <img src="favicon.svg" alt="Logo NeoRastro" width="32" height="32" />
-      <h1 class="painel-header__titulo">NeoRastro - Painel</h1>
+      <div class="painel-header__logo-wrap">
+        <div class="painel-header__logo-glow"></div>
+        <div class="painel-header__logo-inner">
+          <!-- Usa o mesmo favicon, apenas com efeito neon via CSS -->
+          <img src="favicon.svg" alt="Logo NeoRastro" />
+        </div>
+      </div>
+      <div class="painel-header__titulo">
+        <div class="painel-header__titulo-texto">NeoRastro</div>
+        <div class="painel-header__subtitulo">Painel de rastreamento</div>
+      </div>
     </div>
     <div class="painel-header__acoes">
-      <span id="bem-vindo" class="painel-header__bem-vindo">Ola!</span>
+      <span id="bem-vindo" class="painel-header__bem-vindo">Olá!</span>
       <button id="botao-sair" type="button" class="neo-btn neo-btn--primary">
-        <i data-feather="log-out"></i> Sair
+        <i data-feather="log-out"></i>
+        <span>Sair</span>
       </button>
     </div>
   </header>
@@ -128,16 +638,46 @@
   <main class="painel-main" role="main">
     <div id="mapa-rastreamento" aria-label="Mapa de rastreamento"></div>
 
-    <aside class="painel-lateral" aria-label="Painel de veiculos e comandos">
-      <h2><i data-feather="truck"></i> Meus veiculos</h2>
-      <div id="lista-veiculos"></div>
+    <aside class="painel-lateral" aria-label="Painel de veículos e comandos">
+      <div class="painel-lateral__topo">
+        <h2><i data-feather="truck"></i> Meus veículos</h2>
+        <span class="painel-lateral__etiqueta">NeoRastro Cloud</span>
+      </div>
 
-      <div class="neo-historico">
-        <h3><i data-feather="clock"></i> Historico de comandos</h3>
-        <ul id="lista-comandos" class="neo-historico__lista"></ul>
-        <button id="botao-atualizar-comandos" class="neo-btn neo-btn--secondary" style="width:100%;">
-          <i data-feather="refresh-cw"></i> Atualizar historico
-        </button>
+      <div class="painel-lateral__conteudo">
+        <section class="neo-card">
+          <div class="neo-card__cabecalho">
+            <div>
+              <div class="neo-card__titulo">
+                <i data-feather="navigation-2"></i>
+                <span>Veículos cadastrados</span>
+              </div>
+              <div class="neo-card__subtitulo">
+                Controle de bloqueio e desbloqueio dos dispositivos.
+              </div>
+            </div>
+          </div>
+          <div id="lista-veiculos"></div>
+        </section>
+
+        <section class="neo-card neo-historico">
+          <div class="neo-card__cabecalho">
+            <div>
+              <div class="neo-card__titulo">
+                <i data-feather="clock"></i>
+                <span>Histórico de comandos</span>
+              </div>
+              <div class="neo-card__subtitulo">
+                Últimos comandos enviados aos rastreadores.
+              </div>
+            </div>
+            <button id="botao-atualizar-comandos" class="neo-btn neo-btn--secondary">
+              <i data-feather="refresh-cw"></i>
+              <span>Atualizar</span>
+            </button>
+          </div>
+          <ul id="lista-comandos" class="neo-historico__lista"></ul>
+        </section>
       </div>
     </aside>
   </main>
@@ -149,6 +689,7 @@
   <script src="painel.js"></script>
 </body>
 </html>
+
 
 
 
