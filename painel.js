@@ -13,7 +13,7 @@ function pegarUsuario() {
     const usuario = JSON.parse(bruto);
     return usuario && typeof usuario === "object" ? usuario : null;
   } catch (e) {
-    console.error("Erro ao ler usuarioLogado do storage:", e);
+    console.error("Erro ao ler usuarioLogado do armazenamento:", e);
     sessionStorage.removeItem("usuarioLogado");
     localStorage.removeItem("usuarioLogado");
     return null;
@@ -50,7 +50,7 @@ function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   window.__msgTimer = setTimeout(() => (msg.style.display = "none"), tempo);
 }
 
-/* ===== Função genérica de API ===== */
+/* ===== Função genérica da API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -75,7 +75,7 @@ async function api(caminho, opcoes = {}) {
     }
 
     const dados = await resposta.json().catch(() => ({}));
-    if (!resposta.ok) throw new Error(dados.erro || "Erro ao acessar API.");
+    if (!resposta.ok) throw new Error(dados.erro || "Erro ao acessar a API.");
     return dados;
   } catch (erro) {
     console.error("Erro na API:", erro);
@@ -96,7 +96,7 @@ async function enviarComando(id_veiculo, tipo, botao) {
       body: JSON.stringify({ tipo, id_veiculo }),
     });
 
-    mostrarAviso(resposta.mensagem || "✅ Comando enviado!", "success");
+    mostrarAviso(resposta.mensagem || "✅ Comando enviado com sucesso!", "success");
     listarComandos();
   } catch (e) {
     console.error(e);
@@ -157,7 +157,7 @@ async function listarVeiculos() {
 
     if (typeof feather !== "undefined") feather.replace();
 
-    // Atualiza o mapa com o primeiro veículo
+    // Iniciar rastreamento do primeiro veículo
     const primeiro = veiculos[0];
     if (primeiro?.imei) {
       iniciarRastreamento(primeiro.imei);
@@ -209,7 +209,7 @@ async function listarComandos() {
 }
 
 /* ===== MAPA E RASTREAMENTO ===== */
-let mapa, marcador;
+let mapa, marcador, imeiAtual = null;
 
 function iniciarMapa() {
   mapa = L.map("mapa-rastreamento").setView([-14.235, -51.9253], 4);
@@ -220,6 +220,8 @@ function iniciarMapa() {
 }
 
 async function iniciarRastreamento(imei) {
+  imeiAtual = imei; // Armazena o IMEI atual para atualizações automáticas
+
   try {
     const url = `${API_BASE}/api/posicao/${imei}`;
     const resposta = await fetch(url);
@@ -242,7 +244,7 @@ async function iniciarRastreamento(imei) {
     }
 
     mapa.setView(pos, 15);
-    console.log(`📍 Atualização: ${data_hora}`);
+    console.log(`📍 Atualização de ${imei}: ${data_hora}`);
   } catch (e) {
     console.error("Erro ao obter posição:", e);
   }
@@ -250,10 +252,7 @@ async function iniciarRastreamento(imei) {
 
 // Atualiza posição a cada 10 segundos
 setInterval(() => {
-  if (marcador?.getLatLng) {
-    const imei = marcador.options.imei || "359633100065759";
-    iniciarRastreamento(imei);
-  }
+  if (imeiAtual) iniciarRastreamento(imeiAtual);
 }, 10000);
 
 /* ===== Inicialização ===== */
@@ -276,6 +275,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof feather !== "undefined") feather.replace();
 });
+
+
 
 
 
