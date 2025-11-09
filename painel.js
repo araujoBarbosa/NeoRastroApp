@@ -1,24 +1,19 @@
 "use strict";
 
-/* ===== Configuracao da API ===== */
+/* ===== Configuração da API ===== */
 const API_BASE = "https://api.neorastro.cloud";
 
-/* ===== Controle de sessao ===== */
+/* ===== Controle de sessão ===== */
 function pegarUsuario() {
   try {
     const userSession = sessionStorage.getItem("usuarioLogado");
     const userLocal = localStorage.getItem("usuarioLogado");
-
     const bruto = userSession || userLocal;
     if (!bruto) return null;
-
     const usuario = JSON.parse(bruto);
-    if (!usuario || typeof usuario !== "object") return null;
-
-    return usuario;
+    return usuario && typeof usuario === "object" ? usuario : null;
   } catch (e) {
     console.error("Erro ao ler usuarioLogado do storage:", e);
-    // Se tiver dado corrompido, limpamos para nao ficar em loop
     sessionStorage.removeItem("usuarioLogado");
     localStorage.removeItem("usuarioLogado");
     return null;
@@ -29,12 +24,11 @@ function pegarToken() {
   try {
     const tokenSession = sessionStorage.getItem("token");
     const tokenLocal = localStorage.getItem("token");
-    const token = tokenSession || tokenLocal || null;
-    return token || null;
+    return tokenSession || tokenLocal || null;
   } catch (e) {
-    console.error("Erro ao ler token do storage:", e);
-    sessionStorage.removeItem("token");
-    localStorage.removeItem("token");
+    console.error("Erro ao ler token:", e);
+    sessionStorage.clear();
+    localStorage.clear();
     return null;
   }
 }
@@ -49,18 +43,14 @@ function sairSistema() {
 function mostrarAviso(mensagem, tipo = "info", tempo = 3000) {
   const msg = document.getElementById("mensagem-aviso");
   if (!msg) return;
-
   msg.textContent = mensagem;
   msg.className = `neo-toast neo-toast--${tipo}`;
   msg.style.display = "block";
-
   clearTimeout(window.__msgTimer);
-  window.__msgTimer = setTimeout(() => {
-    msg.style.display = "none";
-  }, tempo);
+  window.__msgTimer = setTimeout(() => (msg.style.display = "none"), tempo);
 }
 
-/* ===== Funcao generica da API ===== */
+/* ===== Função genérica de API ===== */
 async function api(caminho, opcoes = {}) {
   const url = caminho.startsWith("http")
     ? caminho
@@ -78,23 +68,14 @@ async function api(caminho, opcoes = {}) {
       ...opcoes,
     });
 
-    // Se vier 401, so derruba a sessao se REALMENTE existir token salvo
-    if (resposta.status === 401) {
-      const tokenAtual = pegarToken();
-      if (tokenAtual && tokenAtual !== "login_local") {
-        mostrarAviso("⚠️ Sessao expirada. Faca login novamente.", "error");
-        sairSistema();
-        throw new Error("Sessao expirada");
-      }
+    if (resposta.status === 401 && token && token !== "login_local") {
+      mostrarAviso("⚠️ Sessão expirada. Faça login novamente.", "error");
+      sairSistema();
+      throw new Error("Sessão expirada");
     }
 
     const dados = await resposta.json().catch(() => ({}));
-
-    if (!resposta.ok) {
-      const erro = dados.erro || dados.mensagem || dados.message || "Erro ao acessar a API.";
-      throw new Error(erro);
-    }
-
+    if (!resposta.ok) throw new Error(dados.erro || "Erro ao acessar API.");
     return dados;
   } catch (erro) {
     console.error("Erro na API:", erro);
@@ -126,22 +107,21 @@ async function enviarComando(id_veiculo, tipo, botao) {
   }
 }
 
-/* ===== Listar veiculos ===== */
+/* ===== Listar veículos ===== */
 async function listarVeiculos() {
   const container = document.getElementById("lista-veiculos");
   if (!container) return;
-  container.innerHTML = `<div class="neo-historico__vazio">Carregando veiculos...</div>`;
+  container.innerHTML = `<div class="neo-historico__vazio">Carregando veículos...</div>`;
 
   try {
     const veiculos = await api("/veiculos");
 
-    if (!veiculos || veiculos.length === 0) {
-      container.innerHTML = `<div class="neo-historico__vazio">Nenhum veiculo encontrado.</div>`;
+    if (!veiculos?.length) {
+      container.innerHTML = `<div class="neo-historico__vazio">Nenhum veículo encontrado.</div>`;
       return;
     }
 
     container.innerHTML = "";
-
     veiculos.forEach((v) => {
       const statusClass =
         v.status === "ativo"
@@ -154,7 +134,7 @@ async function listarVeiculos() {
       bloco.className = "neo-veiculo neo-fade-in";
       bloco.innerHTML = `
         <div class="neo-veiculo__info">
-          <span class="neo-veiculo__modelo">${v.nome || v.modelo || "Sem modelo"}</span>
+          <span class="neo-veiculo__modelo">${v.nome || "Sem modelo"}</span>
           <div class="neo-veiculo__detalhe"><i data-feather="hash"></i> IMEI: ${v.imei || "—"}</div>
           <div class="neo-veiculo__detalhe">
             <i data-feather="activity"></i> Status:
@@ -164,10 +144,10 @@ async function listarVeiculos() {
           </div>
         </div>
         <div class="neo-veiculo__acoes">
-          <button class="neo-btn neo-btn--danger" data-id="${v.id}" data-tipo="bloquear">
+          <button class="neo-btn neo-btn--danger" data-id="${v.id}" data-imei="${v.imei}" data-tipo="bloquear">
             <i data-feather="lock"></i> Bloquear
           </button>
-          <button class="neo-btn neo-btn--success" data-id="${v.id}" data-tipo="desbloquear">
+          <button class="neo-btn neo-btn--success" data-id="${v.id}" data-imei="${v.imei}" data-tipo="desbloquear">
             <i data-feather="unlock"></i> Desbloquear
           </button>
         </div>
@@ -177,22 +157,27 @@ async function listarVeiculos() {
 
     if (typeof feather !== "undefined") feather.replace();
 
+    // Atualiza o mapa com o primeiro veículo
+    const primeiro = veiculos[0];
+    if (primeiro?.imei) {
+      iniciarRastreamento(primeiro.imei);
+    }
+
     container.querySelectorAll("button[data-tipo]").forEach((botao) => {
       botao.addEventListener("click", async (e) => {
-        const botaoReal = e.target.closest("button");
-        const tipo = botaoReal.dataset.tipo;
-        const id = botaoReal.dataset.id;
-        await enviarComando(id, tipo, botaoReal);
+        const b = e.target.closest("button");
+        const tipo = b.dataset.tipo;
+        const id = b.dataset.id;
+        await enviarComando(id, tipo, b);
       });
     });
   } catch (e) {
     console.error(e);
-    container.innerHTML = `<div class="neo-historico__vazio">❌ Erro ao carregar veiculos.</div>`;
-    mostrarAviso("❌ Falha ao conectar com a API.", "error");
+    container.innerHTML = `<div class="neo-historico__vazio">❌ Erro ao carregar veículos.</div>`;
   }
 }
 
-/* ===== Listar historico de comandos ===== */
+/* ===== Listar histórico de comandos ===== */
 async function listarComandos() {
   const lista = document.getElementById("lista-comandos");
   if (!lista) return;
@@ -218,47 +203,72 @@ async function listarComandos() {
     });
 
     if (typeof feather !== "undefined") feather.replace();
-  } catch (e) {
-    console.error(e);
+  } catch {
     lista.innerHTML = `<li class="neo-historico__vazio">❌ Erro ao buscar comandos.</li>`;
-    mostrarAviso("❌ Erro ao carregar historico.", "error");
   }
 }
 
-/* ===== Inicializar mapa Leaflet ===== */
-let mapa;
+/* ===== MAPA E RASTREAMENTO ===== */
+let mapa, marcador;
+
 function iniciarMapa() {
   mapa = L.map("mapa-rastreamento").setView([-14.235, -51.9253], 4);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+    maxZoom: 19,
+    attribution: "© OpenStreetMap",
   }).addTo(mapa);
 }
 
-/* ===== Inicializacao da pagina ===== */
+async function iniciarRastreamento(imei) {
+  try {
+    const url = `${API_BASE}/api/posicao/${imei}`;
+    const resposta = await fetch(url);
+    if (!resposta.ok) return;
+    const dados = await resposta.json();
+
+    const { latitude, longitude, data_hora } = dados;
+
+    if (latitude === 0 && longitude === 0) {
+      console.log("📡 Aguardando coordenadas reais...");
+      return;
+    }
+
+    const pos = [latitude, longitude];
+
+    if (marcador) {
+      marcador.setLatLng(pos);
+    } else {
+      marcador = L.marker(pos).addTo(mapa);
+    }
+
+    mapa.setView(pos, 15);
+    console.log(`📍 Atualização: ${data_hora}`);
+  } catch (e) {
+    console.error("Erro ao obter posição:", e);
+  }
+}
+
+// Atualiza posição a cada 10 segundos
+setInterval(() => {
+  if (marcador?.getLatLng) {
+    const imei = marcador.options.imei || "359633100065759";
+    iniciarRastreamento(imei);
+  }
+}, 10000);
+
+/* ===== Inicialização ===== */
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = pegarUsuario();
-  const token = pegarToken();
-
-  // So bloqueia acesso se NAO tiver usuario E NAO tiver token
-  if (!usuario && !token) {
-    console.warn("Nenhum usuario logado encontrado, voltando ao login...");
+  if (!usuario && !pegarToken()) {
     location.href = "index.html";
     return;
   }
 
   const spanBemVindo = document.getElementById("bem-vindo");
-  if (spanBemVindo) {
-    spanBemVindo.textContent = `Ola, ${usuario?.nome || "usuario"}!`;
-  }
+  if (spanBemVindo) spanBemVindo.textContent = `Olá, ${usuario?.nome || "usuário"}!`;
 
-  const botaoSair = document.getElementById("botao-sair");
-  if (botaoSair) botaoSair.addEventListener("click", sairSistema);
-
-  const botaoHistorico = document.getElementById("botao-atualizar-comandos");
-  if (botaoHistorico) {
-    botaoHistorico.addEventListener("click", listarComandos);
-  }
+  document.getElementById("botao-sair")?.addEventListener("click", sairSistema);
+  document.getElementById("botao-atualizar-comandos")?.addEventListener("click", listarComandos);
 
   iniciarMapa();
   listarVeiculos();
@@ -266,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof feather !== "undefined") feather.replace();
 });
+
 
 
 
